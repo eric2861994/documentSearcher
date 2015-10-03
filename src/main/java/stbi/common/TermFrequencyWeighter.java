@@ -12,7 +12,7 @@ public class TermFrequencyWeighter extends TermWeighter {
 
     @Override
     Map<Term, Double> getTermsWeight(TermFrequency termFrequency) {
-        Map<Term, Double> termWeight = new HashMap<>();
+        Map<Term, Double> termWeight = new HashMap<Term, Double>();
 
         for (Term term : termFrequency.getTerms()) {
             termWeight.put(term, (double) termFrequency.getFrequency(term));

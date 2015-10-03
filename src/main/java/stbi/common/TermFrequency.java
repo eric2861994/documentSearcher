@@ -10,7 +10,7 @@ import java.util.Map;
  * Store the frequency of each term.
  */
 public class TermFrequency {
-    private Map<Term, Integer> wordFrequency = new HashMap<>();
+    private Map<Term, Integer> wordFrequency = new HashMap<Term, Integer>();
 
     public TermFrequency(TermStream termStream) {
         while (termStream.hasNext()) {
