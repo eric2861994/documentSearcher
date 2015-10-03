@@ -1,7 +1,7 @@
 package stbi.common.term;
 
 /**
- * Term representation.
+ * Word representation.
  */
 public class Term {
     private String text;

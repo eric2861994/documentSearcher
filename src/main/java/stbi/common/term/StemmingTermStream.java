@@ -5,7 +5,8 @@ import stbi.common.term.stemmer.Stemmer;
 
 /**
  * Stemming Term Stream with Another TermStream as the source.
- * TODO by Winson, please implement this class.
+ *
+ * Uses Porter Stemmer as the stemming algorithm.
  */
 public class StemmingTermStream implements TermStream {
     private final TermStream _stream;

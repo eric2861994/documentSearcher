@@ -7,6 +7,6 @@ import java.util.Map;
 /**
  * Weighter for a term.
  */
-public abstract class TermWeighter {
-    abstract Map<Term, Double> getTermsWeight(TermFrequency termFrequency);
+public interface TermWeighter {
+    Map<Term, Double> getTermsWeight(TermFrequency termFrequency);
 }

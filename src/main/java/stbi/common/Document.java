@@ -1,7 +1,12 @@
 package stbi.common;
 
+import stbi.searcher.QueryVector;
+
 /**
- * Created by Klongkgung on 10/2/2015.
+ * TODO comment
  */
 public class Document {
+    public double getSimilarity(QueryVector queryVector) {
+        return 0;
+    }
 }
