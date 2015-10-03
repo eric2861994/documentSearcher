@@ -3,7 +3,7 @@ package stbi.common.exception;
 /**
  * Thrown in Term Stream when next is called, but no term exists.
  */
-public class NoTermException extends Exception {
+public class NoTermException extends RuntimeException {
     public NoTermException() {
     }
 

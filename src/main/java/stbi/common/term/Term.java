@@ -10,7 +10,12 @@ public class Term {
         text = _text;
     }
 
-    String getText() {
+    public String getText() {
         return text;
+    }
+
+    @Override
+    public int hashCode() {
+        return text.hashCode();
     }
 }
