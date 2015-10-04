@@ -1,6 +1,6 @@
 package stbi.common.index;
 
-import stbi.common.Document;
+import stbi.common.IndexedDocument;
 import stbi.common.term.Term;
 
 /**
@@ -11,7 +11,7 @@ import stbi.common.term.Term;
 public class ModifiedInvertedIndex implements Index {
 
     @Override
-    public Document[] getDocuments(Term[] terms) {
-        return new Document[0];
+    public IndexedDocument[] getDocuments(Term[] terms) {
+        return new IndexedDocument[0];
     }
 }

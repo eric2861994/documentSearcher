@@ -2,7 +2,6 @@ package stbi.searcher;
 
 import stbi.common.*;
 import stbi.common.index.Index;
-import stbi.common.index.ModifiedInvertedIndex;
 import stbi.common.term.StringTermStream;
 import stbi.common.term.Term;
 
@@ -17,11 +16,10 @@ import java.util.Map;
 public class Searcher {
     private final Index index;
 
-    private TermWeighter termWeighter;
+    private TermWeighter termWeighter = new TermFrequencyWeighter();
 
-    Searcher() {
-        termWeighter = new TermFrequencyWeighter();
-        index = new ModifiedInvertedIndex();
+    Searcher(Index _index) {
+        index = _index;
     }
 
     List<DocumentSimilarity> search(String query) {
@@ -39,23 +37,24 @@ public class Searcher {
 
         QueryVector queryVector = null;
 
-//        Find the documents that contain the query.
-        Document[] documents = index.getDocuments(new Term[0]);
+//        Find the indexedDocuments that contain the query.
+        IndexedDocument[] indexedDocuments = index.getDocuments(new Term[0]);
 
         // for each document we compute the similarity of it with query
-        DocumentSimilarity[] documentSimilarityArray = new DocumentSimilarity[documents.length];
+        DocumentSimilarity[] documentSimilarityArray = new DocumentSimilarity[indexedDocuments.length];
         int idx = 0;
-        for (Document oneDocument : documents) {
-            double similarity = oneDocument.getSimilarity(queryVector);
-            documentSimilarityArray[idx] = new DocumentSimilarity(similarity, oneDocument);
+        for (IndexedDocument oneIndexedDocument : indexedDocuments) {
+            // TODO this might not need queryvector, supply Map<Term, Double> instead.
+            double similarity = oneIndexedDocument.getSimilarity(queryVector);
+            documentSimilarityArray[idx] = new DocumentSimilarity(similarity, oneIndexedDocument);
 
             idx++;
         }
 
-        // sort documents descending by similarity
+        // sort indexedDocuments descending by similarity
         Arrays.sort(documentSimilarityArray);
 
-        // select documents with similarity > 0
+        // select indexedDocuments with similarity > 0
         List<DocumentSimilarity> selectedDocumentSimilarity = new ArrayList<>();
         for (DocumentSimilarity oneDocumentSimilarity : documentSimilarityArray) {
             if (oneDocumentSimilarity.getSimilarity() > 0) {

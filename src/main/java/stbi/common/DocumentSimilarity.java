@@ -5,19 +5,19 @@ package stbi.common;
  */
 public class DocumentSimilarity implements Comparable<DocumentSimilarity> {
     private final double similarity;
-    private final Document document;
+    private final IndexedDocument indexedDocument;
 
-    public DocumentSimilarity(double _similarity, Document _document) {
+    public DocumentSimilarity(double _similarity, IndexedDocument _document) {
         similarity = _similarity;
-        document = _document;
+        indexedDocument = _document;
     }
 
     public double getSimilarity() {
         return similarity;
     }
 
-    public Document getDocument() {
-        return document;
+    public IndexedDocument getIndexedDocument() {
+        return indexedDocument;
     }
 
     @Override
