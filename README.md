@@ -10,7 +10,7 @@ Tugas Besar IF4042 Sistem Temu Balik Informasi.
 
 
 # Setting Play Framework 2.X untuk Intellij IDEA
-1. Download Play Framework plugin (File > Settings > Plugins > Install JetBrains plugin > Play Framework)
+1. Download Scala (File > Settings > Plugins > Install JetBrains plugin > Gunakan keyword "play")
 2. Restart Intellij IDEA
 3. Buka File > New > project from existing sources > documentSearcher
 4. Pilih import project from external model (SBT)
