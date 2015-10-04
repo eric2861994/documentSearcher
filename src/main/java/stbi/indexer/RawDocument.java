@@ -8,4 +8,8 @@ public class RawDocument {
     private String title; // judul dokumen
     private String author; // nama pengarang dokumen
     private String body; // isi dokumen
+
+    String getBody() {
+        return body;
+    }
 }
