@@ -60,3 +60,12 @@ crashlytics-build.properties
 
 # custom ignore
 lib/
+logs/
+.gradle/
+.settings/
+build/
+project/
+target/
+gradle/
+gradlew
+gradlew.bat
