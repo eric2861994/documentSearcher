@@ -2,12 +2,8 @@ package stbi.indexer;
 
 import stbi.common.TermFrequency;
 import stbi.common.term.StringTermStream;
-import stbi.common.term.Term;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -74,7 +70,7 @@ public class ModifiedInvertedIndexer {
         return null;
     }
 
-    void setStopwords(File stopwordsFile) throws FileNotFoundException {
+    void setStopwords(File stopwordsFile) throws IOException {
         stopwords = loadStopwords(stopwordsFile);
     }
 
@@ -82,21 +78,23 @@ public class ModifiedInvertedIndexer {
      * Get stopwords from a file.
      * <p/>
      * File containing Stopwords is separated by a newline and ends with a newline.
-     * TODO implement by Winson
      *
      * @param stopwordsFile file containing the stopwords
      * @return stopwords
-     * @throws FileNotFoundException this will rarely happen as File is checked before passed to this class
+     * @throws IOException this will rarely happen as File is checked before passed to this class
      */
-    private String[] loadStopwords(File stopwordsFile) throws FileNotFoundException {
+    private String[] loadStopwords(File stopwordsFile) throws IOException {
         FileReader fileReader = new FileReader(stopwordsFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-        List<String> soptwords = new ArrayList<>();
+        List<String> stopwords = new ArrayList<>();
 
-        // TODO implement
         // just return all the stopwords extracted from each line of the file.
+        String stopword;
+        while ((stopword = bufferedReader.readLine()) != null) {
+            stopwords.add(stopword);
+        }
 
-        return null;
+        return (String[]) stopwords.toArray();
     }
 }
