@@ -1,12 +1,18 @@
 package stbi.indexer;
 
+import stbi.common.IndexTermWeighter;
+import stbi.common.IndexedDocument;
 import stbi.common.TermFrequency;
+import stbi.common.TermWeighter;
+import stbi.common.index.ModifiedInvertedIndex;
 import stbi.common.term.StringTermStream;
-import sun.security.ec.ECDSASignature;
+import stbi.common.term.Term;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Modified Inverted Indexer.
@@ -17,39 +23,66 @@ import java.util.List;
  */
 public class ModifiedInvertedIndexer {
 
-    private final File documentFiles;
-    private String[] stopwords;
+    private final File documentsFile;
+    private final String[] stopwords;
+    private final IndexTermWeighter indexTermWeighter = new IndexTermWeighter();
 
-    ModifiedInvertedIndexer(File _documentsFile, File stopwordsFile) {
-        documentFiles = _documentsFile;
+    ModifiedInvertedIndexer(File _documentsFile, String[] _stopwords) {
+        documentsFile = _documentsFile;
+        stopwords = _stopwords;
     }
 
-    void createIndex() {
+    ModifiedInvertedIndex createIndex(TermWeighter termWeighter, boolean useIDF, boolean useNormalization) {
         // load all documents
-
         RawDocument[] documents = new RawDocument[0];
 
         // find term frequency for each document
         TermFrequency[] termFrequencies = new TermFrequency[documents.length];
+        for (int docIdx = 0; docIdx < documents.length; docIdx++) {
+            RawDocument oneDocument = documents[docIdx];
 
-        int idx = 0;
-        for (RawDocument oneDocument : documents) {
+            // TODO here we assume only the document's body is used indexing
             String body = oneDocument.getBody();
             StringTermStream stringTermStream = new StringTermStream(body);
             TermFrequency termFrequency = new TermFrequency(stringTermStream);
 
-            termFrequencies[idx] = termFrequency;
-
-            idx++;
+            termFrequencies[docIdx] = termFrequency;
         }
 
-        /*
-        1. discover all documents
+        // create a map from a term to document's index
+        Map<Term, List<Integer>> termDocument = new HashMap<>();
+        for (int docIdx = 0; docIdx < documents.length; docIdx++) {
+            TermFrequency documentTermFrequency = termFrequencies[docIdx];
 
-        3. weight it using specific algorithm
-        4. create document model for each document
-        5. create index
-         */
+            for (Term term : documentTermFrequency.getTerms()) {
+                // make term map include current document
+                if (termDocument.containsKey(term)) {
+                    List<Integer> documentList = termDocument.get(term);
+                    documentList.add(docIdx);
+
+                } else {
+                    List<Integer> documentList = new ArrayList<>();
+                    documentList.add(docIdx);
+                    termDocument.put(term, documentList);
+                }
+            }
+        }
+
+        // weight documents using specific algorithm
+        List<Map<Term, Double>> documentVector = indexTermWeighter.weightAllDocuments(
+                termWeighter, useIDF, useNormalization, termFrequencies, termDocument);
+
+        // create document model for each document
+        IndexedDocument[] indexedDocuments = new IndexedDocument[documents.length];
+        for (int docIdx = 0; docIdx < documents.length; docIdx++) {
+            RawDocument oneDocument = documents[docIdx];
+            IndexedDocument oneIndexedDocument = new IndexedDocument(oneDocument, documentVector.get(docIdx));
+
+            indexedDocuments[docIdx] = oneIndexedDocument;
+        }
+
+        // create index
+        return new ModifiedInvertedIndex(termDocument, indexedDocuments);
     }
 
     /**
@@ -59,7 +92,7 @@ public class ModifiedInvertedIndexer {
      * For the format please refer to README in dataset.
      */
     List<RawDocument> loadAllDocuments() throws IOException {
-        FileReader fileReader = new FileReader(documentFiles);
+        FileReader fileReader = new FileReader(documentsFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
 
         /*
@@ -88,7 +121,7 @@ public class ModifiedInvertedIndexer {
                     //BEGINNING OF NEW SECTION
 
                     currentSection = line.charAt(0);
-                    if (line.charAt(1) == RawDocument.SECTION_ID && line.length()>=3) {
+                    if (line.charAt(1) == RawDocument.SECTION_ID) {
                         //BEGINNING OF NEW DOCUMENTS
 
                         if (numOfDocument!=0) {
@@ -102,7 +135,7 @@ public class ModifiedInvertedIndexer {
                             body.setLength(0);
                         }
                         
-                        id = Integer.parseInt(line.substring(3,3));
+                        if (line.length()>3) id = Integer.parseInt(line.substring(3,3));
                     }
                     numOfDocument++;
 
@@ -136,14 +169,8 @@ public class ModifiedInvertedIndexer {
         return rawDocuments;
     }
 
-    private RawDocument getRawDocumentFromDocumentString(String documentString) {
-        String splitString[] = documentString.split("\n");
-
-
-    }
-
     void setStopwords(File stopwordsFile) throws IOException {
-        stopwords = loadStopwords(stopwordsFile);
+        loadStopwords(stopwordsFile);
     }
 
     /**

@@ -28,7 +28,7 @@ public class TermFrequency {
         return wordFrequency.get(term);
     }
 
-    Term[] getTerms() {
+    public Term[] getTerms() {
         return (Term[]) wordFrequency.keySet().toArray();
     }
 }
