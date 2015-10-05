@@ -64,7 +64,6 @@ logs/
 .gradle/
 .settings/
 build/
-project/
 target/
 gradle/
 gradlew
