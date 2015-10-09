@@ -140,12 +140,15 @@ public class ModifiedInvertedIndexer {
                 } else {
                     switch (currentSection) {
                         case SECTION_TITLE:
+                            if (!title.toString().equals((""))) title.append("\n");
                             title.append(line);
                             break;
                         case SECTION_AUTHOR:
+                            if (!author.toString().equals((""))) title.append("\n");
                             author.append(line);
                             break;
                         case SECTION_CONTENT:
+                            if (!body.toString().equals((""))) title.append("\n");
                             body.append(line);
                             break;
                         default:
