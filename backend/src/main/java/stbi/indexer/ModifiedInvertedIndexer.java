@@ -8,7 +8,10 @@ import stbi.common.index.ModifiedInvertedIndex;
 import stbi.common.term.StringTermStream;
 import stbi.common.term.Term;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,16 +35,18 @@ public class ModifiedInvertedIndexer {
         stopwords = _stopwords;
     }
 
-    ModifiedInvertedIndex createIndex(TermWeighter termWeighter, boolean useIDF, boolean useNormalization) {
+    ModifiedInvertedIndex createIndex(TermWeighter termWeighter, boolean useIDF, boolean useNormalization) throws IOException {
         // load all documents
-        RawDocument[] documents = new RawDocument[0];
+        RawDocument[] documents = (RawDocument[]) loadAllDocuments().toArray();
+
+        System.out.println("Loaded all documents");
 
         // find term frequency for each document
         TermFrequency[] termFrequencies = new TermFrequency[documents.length];
         for (int docIdx = 0; docIdx < documents.length; docIdx++) {
             RawDocument oneDocument = documents[docIdx];
 
-            // TODO here we assume only the document's body is used indexing
+            // TODO here we assume only the document's body is used in indexing
             String body = oneDocument.getBody();
             StringTermStream stringTermStream = new StringTermStream(body);
             TermFrequency termFrequency = new TermFrequency(stringTermStream);
@@ -88,19 +93,11 @@ public class ModifiedInvertedIndexer {
     /**
      * Load all documents from documentsFile.
      * <p/>
-     * TODO please implement this Kevin Yudi Utama
      * For the format please refer to README in dataset.
      */
-    List<RawDocument> loadAllDocuments() throws IOException {
+    private List<RawDocument> loadAllDocuments() throws IOException {
         FileReader fileReader = new FileReader(documentsFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-        /*
-        TODO implement
-        for each document, make a RawDocument instance
-        parse every entry of a document into RawDocument
-        return array of RawDocument
-         */
 
         ArrayList<RawDocument> rawDocuments = new ArrayList<>();
 
@@ -117,14 +114,14 @@ public class ModifiedInvertedIndexer {
             char currentSection = '-';
 
             while (line != null) {
-                if (line.charAt(0) == RawDocument.SECTION_TOKEN) {
+                if (line.charAt(0) == SECTION_TOKEN) {
                     //BEGINNING OF NEW SECTION
 
                     currentSection = line.charAt(0);
-                    if (line.charAt(1) == RawDocument.SECTION_ID) {
+                    if (line.charAt(1) == SECTION_ID) {
                         //BEGINNING OF NEW DOCUMENTS
 
-                        if (numOfDocument!=0) {
+                        if (numOfDocument != 0) {
                             rawDocuments.add(new RawDocument(id,
                                     title.toString(),
                                     author.toString(),
@@ -134,20 +131,20 @@ public class ModifiedInvertedIndexer {
                             author.setLength(0);
                             body.setLength(0);
                         }
-                        
-                        if (line.length()>3) id = Integer.parseInt(line.substring(3,3));
+
+                        if (line.length() > 3) id = Integer.parseInt(line.substring(3, 3)); // TODO fix this kayu
                     }
                     numOfDocument++;
 
                 } else {
                     switch (currentSection) {
-                        case RawDocument.SECTION_TITLE:
+                        case SECTION_TITLE:
                             title.append(line);
                             break;
-                        case RawDocument.SECTION_AUTHOR:
+                        case SECTION_AUTHOR:
                             author.append(line);
                             break;
-                        case RawDocument.SECTION_CONTENT:
+                        case SECTION_CONTENT:
                             body.append(line);
                             break;
                         default:
@@ -196,4 +193,12 @@ public class ModifiedInvertedIndexer {
 
         return (String[]) stopwords.toArray();
     }
+
+    //Raw Document FORMAT;
+    public static final char SECTION_TOKEN = '.';
+    public static final char SECTION_ID = 'I';
+    public static final char SECTION_TITLE = 'T';
+    public static final char SECTION_AUTHOR = 'A';
+    public static final char SECTION_CONTENT = 'W';
+    public static final char SECTION_INDEX = 'X';
 }
