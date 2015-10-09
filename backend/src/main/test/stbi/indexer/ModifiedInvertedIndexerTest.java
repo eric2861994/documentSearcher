@@ -51,6 +51,7 @@ public class ModifiedInvertedIndexerTest {
         for (RawDocument oneDocument : documents) {
             int docIdx = getDocumentIndex(oneDocument.getId(), testDocuments);
             if (docIdx != -1) {
+                System.out.println(oneDocument.getTitle()+" n-n "+testDocuments[docIdx].getTitle());
                 Assert.assertEquals(oneDocument, testDocuments[docIdx]);
             }
         }
