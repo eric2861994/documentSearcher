@@ -1,6 +1,15 @@
 # Document Searcher
 Tugas Besar IF4042 Sistem Temu Balik Informasi.
 
+# File Properties untuk testing
+1. Buatlah file `backend/src/main/test/testConfig.properties`
+2. Isi file tersebut seperti ini <br/>
+```
+ADIDocSet = <path ke dataset ADI, contoh D:\\source\\DocumentSearcher\\dataset\\ADI\\adi.all >
+ADITestDocuments = <path ke test documents ADI, contoh D:\\source\\DocumentSearcher\\dataset\\ADI\\test.obj >
+CISIDocSet = <patha ke dataset CISI, contoh D:\\source\\DocumentSearcher\\dataset\\CISI\\cisi.all >
+```
+
 # Setting IDEA untuk menggunakan testNG
 1. buka File > Project Structure
 2. buka Module, tambahkan jar file.

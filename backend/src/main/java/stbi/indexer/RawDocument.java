@@ -1,9 +1,11 @@
 package stbi.indexer;
 
+import java.io.Serializable;
+
 /**
  * Raw Document Model.
  */
-public class RawDocument {
+public class RawDocument implements Serializable {
 
     private final int id; // nomor dokumen
     private final String title; // judul dokumen
@@ -31,5 +33,15 @@ public class RawDocument {
 
     String getBody() {
         return body;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof RawDocument) {
+            RawDocument mo = (RawDocument) o;
+            return id == mo.id && title.equals(mo.title) && author.equals(mo.author) && body.equals(mo.body);
+        }
+
+        return false;
     }
 }

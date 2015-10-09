@@ -96,7 +96,7 @@ public class ModifiedInvertedIndexer {
      * <p/>
      * For the format please refer to README in dataset.
      */
-    private List<RawDocument> loadAllDocuments() throws IOException {
+    public List<RawDocument> loadAllDocuments() throws IOException {
         FileReader fileReader = new FileReader(documentsFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
 
