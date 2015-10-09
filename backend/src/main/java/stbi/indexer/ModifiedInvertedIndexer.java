@@ -37,7 +37,8 @@ public class ModifiedInvertedIndexer {
 
     ModifiedInvertedIndex createIndex(TermWeighter termWeighter, boolean useIDF, boolean useNormalization) throws IOException {
         // load all documents
-        RawDocument[] documents = (RawDocument[]) loadAllDocuments().toArray();
+        List<RawDocument> rawDocumentsList = loadAllDocuments();
+        RawDocument[] documents = (RawDocument[]) rawDocumentsList.toArray(new RawDocument[rawDocumentsList.size()]);
 
         System.out.println("Loaded all documents");
 
@@ -114,11 +115,11 @@ public class ModifiedInvertedIndexer {
             char currentSection = '-';
 
             while (line != null) {
-                if (line.charAt(0) == SECTION_TOKEN) {
+                if (line.length() > 0 && line.charAt(0) == SECTION_TOKEN) {
                     //BEGINNING OF NEW SECTION
 
-                    currentSection = line.charAt(0);
-                    if (line.charAt(1) == SECTION_ID) {
+                    currentSection = line.charAt(1);
+                    if (currentSection == SECTION_ID) {
                         //BEGINNING OF NEW DOCUMENTS
 
                         if (numOfDocument != 0) {
@@ -132,7 +133,7 @@ public class ModifiedInvertedIndexer {
                             body.setLength(0);
                         }
 
-                        if (line.length() > 3) id = Integer.parseInt(line.substring(3, 3)); // TODO fix this kayu
+                        if (line.length() > 3) id = Integer.parseInt(line.substring(3)); // TODO fix this kayu
                     }
                     numOfDocument++;
 
