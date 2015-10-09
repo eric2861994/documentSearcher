@@ -2,6 +2,7 @@ package stbi.common.index;
 
 import stbi.common.IndexedDocument;
 import stbi.common.term.Term;
+import stbi.searcher.QueryVector;
 
 /**
  * Index interface. The implementation can vary.
@@ -28,4 +29,6 @@ public interface Index {
      * @return number of documents of a term in index.
      */
     int getDocumentCount(Term term);
+
+    double getSimilarity(QueryVector query, IndexedDocument document);
 }

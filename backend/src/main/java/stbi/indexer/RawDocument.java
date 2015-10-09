@@ -36,12 +36,22 @@ public class RawDocument implements Serializable {
     }
 
     @Override
+    public int hashCode() {
+        final int prime = 31;
+        int hashcode = id;
+        hashcode = prime * hashcode + title.hashCode();
+        hashcode = prime * hashcode + author.hashCode();
+        hashcode = prime * hashcode + body.hashCode();
+        return hashcode;
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (o instanceof RawDocument) {
             RawDocument mo = (RawDocument) o;
             return id == mo.id && title.equals(mo.title) && author.equals(mo.author) && body.equals(mo.body);
         }
 
-        return false;
+        return super.equals(o);
     }
 }

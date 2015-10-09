@@ -1,12 +1,12 @@
 package stbi.indexer;
 
-import stbi.common.IndexTermWeighter;
 import stbi.common.IndexedDocument;
 import stbi.common.TermFrequency;
-import stbi.common.TermWeighter;
 import stbi.common.index.ModifiedInvertedIndex;
 import stbi.common.term.StringTermStream;
 import stbi.common.term.Term;
+import stbi.common.util.Calculator;
+import stbi.common.util.Pair;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -28,19 +28,18 @@ public class ModifiedInvertedIndexer {
 
     private final File documentsFile;
     private final String[] stopwords;
-    private final IndexTermWeighter indexTermWeighter = new IndexTermWeighter();
+    private final Calculator calculator;
 
-    ModifiedInvertedIndexer(File _documentsFile, String[] _stopwords) {
+    ModifiedInvertedIndexer(File _documentsFile, String[] _stopwords, Calculator _calculator) {
         documentsFile = _documentsFile;
         stopwords = _stopwords;
+        calculator = _calculator;
     }
 
-    ModifiedInvertedIndex createIndex(TermWeighter termWeighter, boolean useIDF, boolean useNormalization) throws IOException {
+    ModifiedInvertedIndex createIndex(Calculator.TFType tfType, boolean useIDF, boolean useNormalization) throws IOException {
         // load all documents
         List<RawDocument> rawDocumentsList = loadAllDocuments();
         RawDocument[] documents = (RawDocument[]) rawDocumentsList.toArray(new RawDocument[rawDocumentsList.size()]);
-
-        System.out.println("Loaded all documents");
 
         // find term frequency for each document
         TermFrequency[] termFrequencies = new TermFrequency[documents.length];
@@ -55,40 +54,73 @@ public class ModifiedInvertedIndexer {
             termFrequencies[docIdx] = termFrequency;
         }
 
-        // create a map from a term to document's index
-        Map<Term, List<Integer>> termDocument = new HashMap<>();
-        for (int docIdx = 0; docIdx < documents.length; docIdx++) {
-            TermFrequency documentTermFrequency = termFrequencies[docIdx];
+        // calculate weight using TF
+        List<Map<Term, Double>> documentWeightList = new ArrayList<>();
+        for (TermFrequency oneTermFrequency : termFrequencies) {
+            Map<Term, Double> documentWeight = calculator.getTFValue(tfType, oneTermFrequency);
+            documentWeightList.add(documentWeight);
+        }
 
-            for (Term term : documentTermFrequency.getTerms()) {
-                // make term map include current document
-                if (termDocument.containsKey(term)) {
-                    List<Integer> documentList = termDocument.get(term);
-                    documentList.add(docIdx);
+        // consider idf
+        if (useIDF) {
+            // count # of documents for each term
+            Map<Term, Integer> termDocumentCount = new HashMap<>();
+            for (TermFrequency oneTermFrequency : termFrequencies) {
+                for (Term term : oneTermFrequency.getTerms()) {
+                    int currentCount = 1;
+                    if (termDocumentCount.containsKey(term)) {
+                        currentCount = termDocumentCount.get(term) + 1;
+                    }
 
-                } else {
-                    List<Integer> documentList = new ArrayList<>();
-                    documentList.add(docIdx);
-                    termDocument.put(term, documentList);
+                    termDocumentCount.put(term, currentCount);
+                }
+            }
+
+            // redefine the weight of each term
+            for (Map<Term, Double> documentWeight : documentWeightList) {
+                for (Term term : documentWeight.keySet()) {
+                    double previousWeight = documentWeight.get(term);
+                    documentWeight.put(term, previousWeight * termIDF(termDocumentCount.get(term), documentWeightList.size()));
                 }
             }
         }
 
-        // weight documents using specific algorithm
-        List<Map<Term, Double>> documentVector = indexTermWeighter.weightAllDocuments(
-                termWeighter, useIDF, useNormalization, termFrequencies, termDocument);
+        // consider normalization
+        if (useNormalization) {
+            // calculate length of each document
+            double[] documentLength = new double[documents.length];
+            for (int docIdx = 0; docIdx < documents.length; docIdx++) {
+                double oneDocumentLength = 0;
+                Map<Term, Double> documentWeight = documentWeightList.get(docIdx);
+                for (Term term : documentWeight.keySet()) {
+                    oneDocumentLength += documentWeight.get(term) * documentWeight.get(term);
+                }
+                documentLength[docIdx] = Math.sqrt(oneDocumentLength);
+            }
 
-        // create document model for each document
-        IndexedDocument[] indexedDocuments = new IndexedDocument[documents.length];
-        for (int docIdx = 0; docIdx < documents.length; docIdx++) {
-            RawDocument oneDocument = documents[docIdx];
-            IndexedDocument oneIndexedDocument = new IndexedDocument(oneDocument, documentVector.get(docIdx));
-
-            indexedDocuments[docIdx] = oneIndexedDocument;
+            // divide every term weight of a document by the document's length
+            for (int docIdx = 0; docIdx < documents.length; docIdx++) {
+                Map<Term, Double> documentWeight = documentWeightList.get(docIdx);
+                for (Term term : documentWeight.keySet()) {
+                    double previousWeight = documentWeight.get(term);
+                    documentWeight.put(term, previousWeight / documentLength[docIdx]);
+                }
+            }
         }
 
         // create index
-        return new ModifiedInvertedIndex(termDocument, indexedDocuments);
+        IndexedDocument[] indexedDocuments = new IndexedDocument[documents.length];
+        for (int docIdx = 0; docIdx < documents.length; docIdx++) {
+            indexedDocuments[docIdx] = new IndexedDocument(documents[docIdx]);
+        }
+        Map<Term, Pair<Integer, Double>> termDocumentWeight = new HashMap<>();
+        for (int docIdx = 0; docIdx < documents.length; docIdx++) {
+            Map<Term, Double> documentWeight = documentWeightList.get(docIdx);
+            for (Term term : documentWeight.keySet()) {
+                termDocumentWeight.put(term, new Pair<>(docIdx, documentWeight.get(term)));
+            }
+        }
+        return new ModifiedInvertedIndex(termDocumentWeight, indexedDocuments);
     }
 
     /**
@@ -196,6 +228,19 @@ public class ModifiedInvertedIndexer {
         }
 
         return (String[]) stopwords.toArray();
+    }
+
+    /**
+     * Calculate the IDF value for a term.
+     * <p/>
+     * Using the standard IDF formula log(N/n_t).
+     *
+     * @param documentOccurrence the number of documents containing a specific term
+     * @param documentsCount     the total number of documents
+     * @return IDF
+     */
+    private double termIDF(int documentOccurrence, int documentsCount) {
+        return Math.log((double) documentsCount / documentOccurrence);
     }
 
     //Raw Document FORMAT;

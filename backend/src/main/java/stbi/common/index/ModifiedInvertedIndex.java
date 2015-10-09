@@ -2,6 +2,8 @@ package stbi.common.index;
 
 import stbi.common.IndexedDocument;
 import stbi.common.term.Term;
+import stbi.common.util.Pair;
+import stbi.searcher.QueryVector;
 
 import java.util.List;
 import java.util.Map;
@@ -13,12 +15,12 @@ import java.util.Map;
  * TODO might have to be serializable to be able to save to file easily.
  */
 public class ModifiedInvertedIndex implements Index {
-    private final Map<Term, List<Integer>> termDocument;
-    private final IndexedDocument[] documents;
+    private final Map<Term, Pair<Integer, Double>> termDocumentWeight;
+    private final IndexedDocument[] indexedDocuments;
 
-    public ModifiedInvertedIndex(Map<Term, List<Integer>> _termDocument, IndexedDocument[] indexedDocuments) {
-        termDocument = _termDocument;
-        documents = indexedDocuments;
+    public ModifiedInvertedIndex(Map<Term, Pair<Integer, Double>> _termDocumentWeight, IndexedDocument[] _indexedDocuments) {
+        termDocumentWeight = _termDocumentWeight;
+        indexedDocuments = _indexedDocuments;
     }
 
     @Override
@@ -33,6 +35,11 @@ public class ModifiedInvertedIndex implements Index {
 
     @Override
     public int getDocumentCount(Term term) {
+        return 0;
+    }
+
+    @Override
+    public double getSimilarity(QueryVector query, IndexedDocument document) {
         return 0;
     }
 }

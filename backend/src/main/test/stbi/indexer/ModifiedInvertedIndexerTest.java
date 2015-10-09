@@ -4,17 +4,17 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import stbi.common.TermFrequencyWeighter;
+import stbi.common.index.ModifiedInvertedIndex;
+import stbi.common.util.Calculator;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Properties;
 
 public class ModifiedInvertedIndexerTest {
 
     private Properties testConfiguration;
+    private Calculator calculator;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -22,6 +22,8 @@ public class ModifiedInvertedIndexerTest {
         testConfiguration = new Properties();
         InputStream inputStream = getClass().getResourceAsStream("/testConfig.properties");
         testConfiguration.load(inputStream);
+
+        calculator = new Calculator();
     }
 
     @AfterMethod
@@ -31,18 +33,17 @@ public class ModifiedInvertedIndexerTest {
 
     @Test
     public void testCreateIndex() throws Exception {
-        String path = "d:\\source\\DocumentSearcher\\dataset\\CISI\\cisi.all";
-        File documentFile = new File(path);
-        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(documentFile, null);
+        File documentFile = new File(testConfiguration.getProperty("ADIDocSet"));
+        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(documentFile, null, calculator);
 
-        TermFrequencyWeighter rawTF = new TermFrequencyWeighter();
-        indexer.createIndex(rawTF, false, false);
+        ModifiedInvertedIndex index = indexer.createIndex(Calculator.TFType.RAW_TF, false, false);
+        System.out.println("Aw yeah!");
     }
 
     @Test
     public void testLoadAllDocuments() throws IOException, ClassNotFoundException {
         File documentFile = new File(testConfiguration.getProperty("ADIDocSet"));
-        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(documentFile, null);
+        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(documentFile, null, calculator);
         List<RawDocument> documents = indexer.loadAllDocuments();
 
         File testDocFile = new File(testConfiguration.getProperty("ADITestDocuments"));
@@ -56,7 +57,9 @@ public class ModifiedInvertedIndexerTest {
         }
     }
 
-    @Test
+    /**
+     * Run this to create test documents
+     */
     public void createTestDocuments() throws IOException, ClassNotFoundException {
         RawDocument[] containedDocuments = new RawDocument[5];
         containedDocuments[0] = new RawDocument(1, "the ibm dsd technical information center - a total systems approach\n" +

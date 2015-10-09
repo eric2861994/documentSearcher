@@ -24,11 +24,11 @@ public class TermFrequency {
         }
     }
 
-    int getFrequency(Term term) {
+    public int getFrequency(Term term) {
         return wordFrequency.get(term);
     }
 
     public Term[] getTerms() {
-        return (Term[]) wordFrequency.keySet().toArray();
+        return wordFrequency.keySet().toArray(new Term[0]);
     }
 }
