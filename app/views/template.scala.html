@@ -1,0 +1,71 @@
+@import formstubs.DocumentSearcherStub
+@import helper.myPlainFieldConstructor
+
+@import views.html.helper.FieldConstructor
+@(documentSearcherForm: Form[DocumentSearcherStub])
+@implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
+
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>STBI</title>
+        @*<link rel="stylesheet" href="css/normalize.css">*@
+        <link href='http://fonts.googleapis.com/css?family=Nunito:400,300' rel='stylesheet' type='text/css'>
+        @*<link rel="stylesheet" href="css/main.css">*@
+        @*<link rel="stylesheet" href="@routes.Assets.at("stylesheets/custom.css")">*@
+        <link rel="stylesheet" href="@routes.Assets.at("bower_components/bootstrap/dist/css/bootstrap.css")">
+        <script src="@routes.Assets.at("bower_components/bootstrap/dist/js/bootstrap.js")" type="text/javascript"></script>
+        <script src="@routes.Assets.at("bower_components/jquery/dist/bootstrap.js")" type="text/javascript"></script>
+    </head>
+    <body>
+
+        @helper.form(action = routes.Application.submit(), 'id -> "myForm") {
+            <div class="col-xs-12">
+                <div class="row form-horizontal">
+                    @helper.inputText(documentSearcherForm("documentLocation"), '_label -> "Document Location");
+                    @helper.inputText(documentSearcherForm("queryLocation"), '_label -> "Query Location");
+                    @helper.inputText(documentSearcherForm("relevantJudgement"), '_label -> "Relevant Judgement");
+                    @helper.inputText(documentSearcherForm("stopwordLocation"), '_label -> "StopWord Location");
+                </div>
+                <div class="row">
+                    <div class="col-xs-6">
+                        <label class="control-label" for="document">Document</label>
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                @helper.inputRadioGroup(documentSearcherForm("dTf"),
+                                    options = views.html.helper.options("NO"->"No","RAW"->"Raw", "BINARY"->"Binary", "AUGMENTED"->"Augmented", "LOGARITHMIC"->"Logarithmic"))
+                            </div>
+                            <div class="form-group">
+                                @helper.inputRadioGroup(documentSearcherForm("dIdf"),
+                                    options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                            </div>
+                            <div class="form-group">
+                                @helper.inputRadioGroup(documentSearcherForm("dNormalization"),
+                                    options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-6">
+                        <label class="control-label" for="query">Query</label>
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                @helper.inputRadioGroup(documentSearcherForm("qTf"),
+                                    options = views.html.helper.options("NO"->"No","RAW"->"Raw", "BINARY"->"Binary", "AUGMENTED"->"Augmented", "LOGARITHMIC"->"Logarithmic"))
+                            </div>
+                            <div class="form-group">
+                                @helper.inputRadioGroup(documentSearcherForm("qIdf"),
+                                    options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                            </div>
+                            <div class="form-group">
+                                @helper.inputRadioGroup(documentSearcherForm("qNormalization"),
+                                    options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input type='submit' name='mysubmit' value='Enter' class="btn btn-default" />
+        }
+    </body>
+</html>
