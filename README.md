@@ -26,3 +26,10 @@ CISIDocSet = <patha ke dataset CISI, contoh D:\\source\\DocumentSearcher\\datase
 5. Klik OK
 6. Klik kanan di file app/controllers/Application.java kemudian Run Play 2 App
 7. Buka browser, masukkan alamat localhost:9000
+
+
+# NOTE
+Update terus bower package di folder public
+```
+cd public && sudo bower update
+```
