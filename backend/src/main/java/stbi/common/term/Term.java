@@ -1,9 +1,11 @@
 package stbi.common.term;
 
+import java.io.Serializable;
+
 /**
  * Word representation.
  */
-public class Term {
+public class Term implements Serializable {
     private String text;
 
     Term(String _text) {

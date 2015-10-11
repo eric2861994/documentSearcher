@@ -5,22 +5,31 @@ import stbi.common.term.Term;
 import stbi.common.util.Pair;
 import stbi.searcher.QueryVector;
 
-import java.util.List;
+import java.io.File;
+import java.io.Serializable;
 import java.util.Map;
 
 /**
  * Modified Inverted Index.
  * <p/>
- * Contains both inverted index and normal index.
- * TODO might have to be serializable to be able to save to file easily.
+ * Contains inverted index and indexed documents.
+ * TODO implement save and load
  */
-public class ModifiedInvertedIndex implements Index {
+public class ModifiedInvertedIndex implements Index, Serializable {
     private final Map<Term, Pair<Integer, Double>> termDocumentWeight;
     private final IndexedDocument[] indexedDocuments;
 
     public ModifiedInvertedIndex(Map<Term, Pair<Integer, Double>> _termDocumentWeight, IndexedDocument[] _indexedDocuments) {
         termDocumentWeight = _termDocumentWeight;
         indexedDocuments = _indexedDocuments;
+    }
+
+    public void save(File indexFIle) {
+        // TODO impl
+    }
+
+    public void load(File indexFile) {
+        // TODO impl
     }
 
     @Override
