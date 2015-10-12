@@ -8,10 +8,7 @@ import stbi.common.term.StringTermStream;
 import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Handles searching query
@@ -25,21 +22,16 @@ public class Searcher {
         calculator = _calculator;
     }
 
-    List<DocumentSimilarity> search(String query, Calculator.TFType tfType, boolean isTfNormalized, boolean isUsingIdf) {
+    List<DocumentSimilarity> search(String query, Calculator.TFType tfType, boolean isNormalized, boolean isUsingIdf) {
 //        Make Term Stream from the query.
         StringTermStream stringTermStream = new StringTermStream(query);
 
 //        Calculate Term Frequency from the Term Stream.
         TermFrequency termFrequency = new TermFrequency(stringTermStream);
-        if (isTfNormalized) termFrequency.setIsNormalized(true);
 
         Map<Term, Double> termsWeight = calculator.getTFValue(tfType, termFrequency);
-        if (isUsingIdf) {
-            for(Map.Entry<Term, Double> termDoubleEntry : termsWeight.entrySet()){
-                double idf = Math.log10((double) index.getDocumentCount(termDoubleEntry.getKey()) / index.getAllDocumentCount());
-                termDoubleEntry.setValue(termDoubleEntry.getValue() * idf);
-            }
-        }
+        if (isUsingIdf) addIdfToWeight(termsWeight);
+        if (isNormalized) normalizeTermsWeight(termsWeight);
 
         /* construct vector space model for query
         Convert the query to vector space model.
@@ -73,5 +65,23 @@ public class Searcher {
         }
 
         return selectedDocumentSimilarity;
+    }
+
+    private  void normalizeTermsWeight(Map<Term, Double> termsWeight){
+        double weightLength = 0.0;
+        for(Map.Entry<Term, Double> termDoubleEntry : termsWeight.entrySet()){
+            weightLength += (termDoubleEntry.getValue()*termDoubleEntry.getValue());
+        }
+        weightLength = Math.sqrt(weightLength);
+        for(Map.Entry<Term, Double> termDoubleEntry : termsWeight.entrySet()){
+            termDoubleEntry.setValue(termDoubleEntry.getValue()/weightLength);
+        }
+    }
+
+    private void addIdfToWeight(Map<Term, Double> termsWeight){
+        for(Map.Entry<Term, Double> termDoubleEntry : termsWeight.entrySet()){
+            double idf = Math.log10((double) index.getAllDocumentCount() / index.getDocumentCount(termDoubleEntry.getKey()) );
+            termDoubleEntry.setValue(termDoubleEntry.getValue() * idf);
+        }
     }
 }

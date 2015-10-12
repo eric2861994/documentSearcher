@@ -11,16 +11,11 @@ import java.util.Map;
  */
 public class TermFrequency {
     private Map<Term, Integer> wordFrequency = new HashMap<Term, Integer>();
-    private int totalFrequency;
-    private boolean isNormalized;
 
     public TermFrequency(TermStream termStream) {
-        isNormalized = false;
-        totalFrequency = 0;
 
         while (termStream.hasNext()) {
             Term term = termStream.next();
-            totalFrequency++;
 
             int currentFrequency = 1;
             if (wordFrequency.containsKey(term)) {
@@ -28,25 +23,15 @@ public class TermFrequency {
             }
             wordFrequency.put(term, currentFrequency);
         }
+
     }
 
     public double getFrequency(Term term) {
-        if(isNormalized){
-            return wordFrequency.get(term)/totalFrequency;
-        } else{
-            return wordFrequency.get(term);
-        }
+        return wordFrequency.get(term);
     }
 
     public Term[] getTerms() {
         return wordFrequency.keySet().toArray(new Term[wordFrequency.keySet().size()]);
     }
 
-    public boolean isNormalized() {
-        return isNormalized;
-    }
-
-    public void setIsNormalized(boolean isNormalized) {
-        this.isNormalized = isNormalized;
-    }
 }
