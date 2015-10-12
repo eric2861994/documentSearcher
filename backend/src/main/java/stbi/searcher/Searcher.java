@@ -25,14 +25,21 @@ public class Searcher {
         calculator = _calculator;
     }
 
-    List<DocumentSimilarity> search(String query) {
+    List<DocumentSimilarity> search(String query, Calculator.TFType tfType, boolean isTfNormalized, boolean isUsingIdf) {
 //        Make Term Stream from the query.
         StringTermStream stringTermStream = new StringTermStream(query);
 
 //        Calculate Term Frequency from the Term Stream.
         TermFrequency termFrequency = new TermFrequency(stringTermStream);
+        if (isTfNormalized) termFrequency.setIsNormalized(true);
 
-        Map<Term, Double> termsWeight = calculator.getTFValue(Calculator.TFType.RAW_TF, termFrequency);
+        Map<Term, Double> termsWeight = calculator.getTFValue(tfType, termFrequency);
+        if (isUsingIdf) {
+            for(Map.Entry<Term, Double> termDoubleEntry : termsWeight.entrySet()){
+                double idf = Math.log10((double) index.getDocumentCount(termDoubleEntry.getKey()) / index.getAllDocumentCount());
+                termDoubleEntry.setValue(termDoubleEntry.getValue() * idf);
+            }
+        }
 
         /* construct vector space model for query
         Convert the query to vector space model.
@@ -41,7 +48,7 @@ public class Searcher {
         QueryVector queryVector = null;
 
 //        Find the indexedDocuments that contain the query.
-        IndexedDocument[] indexedDocuments = index.getDocuments(new Term[0]);
+        IndexedDocument[] indexedDocuments = index.getDocuments(termFrequency.getTerms());
 
         // for each document we compute the similarity of it with query
         DocumentSimilarity[] documentSimilarityArray = new DocumentSimilarity[indexedDocuments.length];
