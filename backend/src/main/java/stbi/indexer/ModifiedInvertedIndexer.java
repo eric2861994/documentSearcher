@@ -113,11 +113,19 @@ public class ModifiedInvertedIndexer {
         for (int docIdx = 0; docIdx < documents.length; docIdx++) {
             indexedDocuments[docIdx] = new IndexedDocument(documents[docIdx]);
         }
-        Map<Term, Pair<Integer, Double>> termDocumentWeight = new HashMap<>();
+        Map<Term, List<Pair<Integer, Double>>> termDocumentWeight = new HashMap<>();
         for (int docIdx = 0; docIdx < documents.length; docIdx++) {
             Map<Term, Double> documentWeight = documentWeightList.get(docIdx);
             for (Term term : documentWeight.keySet()) {
-                termDocumentWeight.put(term, new Pair<>(docIdx, documentWeight.get(term)));
+                if (termDocumentWeight.containsKey(term)) {
+                    List<Pair<Integer, Double>> previousList = termDocumentWeight.get(term);
+                    previousList.add(new Pair<>(docIdx, documentWeight.get(term)));
+
+                } else {
+                    List<Pair<Integer, Double>> newList = new ArrayList<Pair<Integer, Double>>();
+                    newList.add(new Pair<>(docIdx, documentWeight.get(term)));
+                    termDocumentWeight.put(term, newList);
+                }
             }
         }
         return new ModifiedInvertedIndex(termDocumentWeight, indexedDocuments);

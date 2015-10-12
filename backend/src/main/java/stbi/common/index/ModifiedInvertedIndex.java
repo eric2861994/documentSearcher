@@ -7,6 +7,7 @@ import stbi.searcher.QueryVector;
 
 import java.io.File;
 import java.io.Serializable;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -16,10 +17,10 @@ import java.util.Map;
  * TODO implement save and load
  */
 public class ModifiedInvertedIndex implements Index, Serializable {
-    private final Map<Term, Pair<Integer, Double>> termDocumentWeight;
+    private final Map<Term, List<Pair<Integer, Double>>> termDocumentWeight;
     private final IndexedDocument[] indexedDocuments;
 
-    public ModifiedInvertedIndex(Map<Term, Pair<Integer, Double>> _termDocumentWeight, IndexedDocument[] _indexedDocuments) {
+    public ModifiedInvertedIndex(Map<Term, List<Pair<Integer, Double>>> _termDocumentWeight, IndexedDocument[] _indexedDocuments) {
         termDocumentWeight = _termDocumentWeight;
         indexedDocuments = _indexedDocuments;
     }
@@ -39,12 +40,12 @@ public class ModifiedInvertedIndex implements Index, Serializable {
 
     @Override
     public int getAllDocumentCount() {
-        return 0;
+        return indexedDocuments.length;
     }
 
     @Override
     public int getDocumentCount(Term term) {
-        return 0;
+        return termDocumentWeight.get(term).size();
     }
 
     @Override

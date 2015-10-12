@@ -1,5 +1,6 @@
 package controllers;
 
+import backend.stbi.application.ApplicationLogic;
 import formstubs.DocumentSearcherStub;
 import play.data.DynamicForm;
 import play.data.Form;
@@ -30,5 +31,12 @@ public class Application extends Controller {
         System.out.println(form.get("qNormalization"));
         return ok(result.render());
     }
+
+    public static Result loadStopwords() {
+        appLogic.loadStopwords();
+        return ok("look at terminal");
+    }
+
+    public static final ApplicationLogic appLogic = ApplicationLogic.getInstance();
 
 }
