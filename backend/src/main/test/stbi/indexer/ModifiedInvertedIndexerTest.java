@@ -4,6 +4,7 @@ import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
+import stbi.common.Loader;
 import stbi.common.index.ModifiedInvertedIndex;
 import stbi.common.util.Calculator;
 
@@ -33,18 +34,21 @@ public class ModifiedInvertedIndexerTest {
 
     @Test
     public void testCreateIndex() throws Exception {
-        File documentFile = new File(testConfiguration.getProperty("ADIDocSet"));
-        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(documentFile, null, calculator);
+        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(calculator);
 
-        ModifiedInvertedIndex index = indexer.createIndex(Calculator.TFType.RAW_TF, false, false);
+        File documentFile = new File(testConfiguration.getProperty("ADIDocSet"));
+        Loader loader = new Loader();
+        List<RawDocument> documents = loader.loadAllDocuments(documentFile);
+        ModifiedInvertedIndex index = indexer.createIndex(documents, Calculator.TFType.RAW_TF, false, false);
         System.out.println("Aw yeah!");
     }
 
     @Test
     public void testLoadAllDocuments() throws IOException, ClassNotFoundException {
+        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(calculator);
         File documentFile = new File(testConfiguration.getProperty("ADIDocSet"));
-        ModifiedInvertedIndexer indexer = new ModifiedInvertedIndexer(documentFile, null, calculator);
-        List<RawDocument> documents = indexer.loadAllDocuments();
+        Loader loader = new Loader();
+        List<RawDocument> documents = loader.loadAllDocuments(documentFile);
 
         File testDocFile = new File(testConfiguration.getProperty("ADITestDocuments"));
         RawDocument[] testDocuments = loadTestDocuments(testDocFile);

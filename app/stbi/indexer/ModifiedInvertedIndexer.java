@@ -8,9 +8,6 @@ import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,11 +25,11 @@ public class ModifiedInvertedIndexer {
 
     private final Calculator calculator;
 
-    ModifiedInvertedIndexer(Calculator _calculator) {
+    public ModifiedInvertedIndexer(Calculator _calculator) {
         calculator = _calculator;
     }
 
-    ModifiedInvertedIndex createIndex(List<RawDocument> rawDocumentsList, Calculator.TFType tfType, boolean useIDF, boolean useNormalization) throws IOException {
+    public ModifiedInvertedIndex createIndex(List<RawDocument> rawDocumentsList, Calculator.TFType tfType, boolean useIDF, boolean useNormalization) throws IOException {
         // load all documents
         RawDocument[] documents = (RawDocument[]) rawDocumentsList.toArray(new RawDocument[rawDocumentsList.size()]);
 
@@ -125,7 +122,6 @@ public class ModifiedInvertedIndexer {
         }
         return new ModifiedInvertedIndex(termDocumentWeight, indexedDocuments);
     }
-
 
 
     /**

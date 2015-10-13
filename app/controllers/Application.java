@@ -1,13 +1,17 @@
 package controllers;
 
-import backend.stbi.application.ApplicationLogic;
+import stbi.ApplicationLogic;
 import formstubs.DocumentSearcherStub;
+import play.Play;
 import play.data.DynamicForm;
 import play.data.Form;
-import play.mvc.*;
+import play.mvc.Controller;
+import play.mvc.Result;
 import views.html.result;
 import views.html.template;
-import views.html.helper.options;
+
+import java.io.File;
+import java.io.IOException;
 
 public class Application extends Controller {
 
@@ -32,11 +36,9 @@ public class Application extends Controller {
         return ok(result.render());
     }
 
-    public static Result loadStopwords() {
-        appLogic.loadStopwords();
-        return ok("look at terminal");
+    public static Result indexDocuments() {
+
     }
 
     public static final ApplicationLogic appLogic = ApplicationLogic.getInstance();
-
 }
