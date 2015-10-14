@@ -1,7 +1,46 @@
-@(message: String)
+@import formstubs.IndexingDocumentStub
+@import helper.myPlainFieldConstructor
+@import views.html.helper.FieldConstructor
+@(title: String)(indexingDocumentForm:Form[IndexingDocumentStub] )
+@implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
+@successMessage = @{flash.get("success")}
+@errorMessage = @{flash.get("error")}
+@main(title = title) {
+    @if(successMessage != null) {
+        <div class="alert alert-success" role="alert"> @successMessage
+        </div>
+    }
+    @if(errorMessage != null) {
+        <div class="alert alert-danger" role="alert"> @errorMessage
+        </div>
+    }
+    @helper.form(action = routes.Application.submit(), 'id -> "myForm") {
+            <div class="row form-horizontal">
+                @helper.inputText(indexingDocumentForm("documentLocation"), '_label -> "Document Location")
+                @*@helper.inputText(indexingDocumentForm("queryLocation"), '_label -> "Query Location")
+                @helper.inputText(indexingDocumentForm("relevantJudgement"), '_label -> "Relevant Judgement")*@
+                @helper.inputText(indexingDocumentForm("stopwordLocation"), '_label -> "StopWord Location")
+            </div>
+            <div class="row">
+                <div class="col-xs-12">
+                    <label class="control-label" for="document">Document</label>
+                    <div class="form-horizontal">
+                        <div class="form-group">
+                        @helper.inputRadioGroup(indexingDocumentForm("dTf"),
+                            options = views.html.helper.options("NO_TF"->"No","RAW_TF"->"Raw", "BINARY_TF"->"Binary", "AUGMENTED_TF"->"Augmented", "LOG_TF"->"Logarithmic"))
+                        </div>
+                        <div class="form-group">
+                        @helper.inputRadioGroup(indexingDocumentForm("dIdf"),
+                            options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                        </div>
+                        <div class="form-group">
+                        @helper.inputRadioGroup(indexingDocumentForm("dNormalization"),
+                            options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                        </div>
+                    </div>
+                </div>
 
-@main("Welcome to Play") {
-
-    @play20.welcome(message, style = "Java")
-
+            </div>
+        <input type='submit' name='mysubmit' value='Enter' class="btn btn-default" />
+    }
 }

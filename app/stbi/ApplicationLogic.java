@@ -46,6 +46,10 @@ public class ApplicationLogic {
                                boolean useNormalization, boolean useStemmer) throws IOException {
         List<RawDocument> documents = loader.loadAllDocuments(documentsFile);
 
+        //TODO solve this bug
+        loader.loadStopwords(stopwordsFile);
+//        modifiedInvertedIndexer.createIndex();
+
         // load stopwords
         String[] stopwordsArray = loader.loadStopwords(stopwordsFile);
         Set<Term> stopwordsSet = new HashSet<>();

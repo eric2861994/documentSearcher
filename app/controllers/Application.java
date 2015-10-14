@@ -1,7 +1,6 @@
 package controllers;
 
-import formstubs.DocumentSearcherStub;
-import play.Play;
+import formstubs.IndexingDocumentStub;
 import play.data.DynamicForm;
 import play.data.Form;
 import play.mvc.Controller;
@@ -11,48 +10,44 @@ import stbi.common.Option;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
 import views.html.result;
-import views.html.template;
+import play.Play;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 
 public class Application extends Controller {
-
+    private static final String WELCOME_STRING = "Welcome to Document Searcher";
     public static Result index() {
-        Form<DocumentSearcherStub> documentSearcherStubForm = Form.form(DocumentSearcherStub.class);
-        DocumentSearcherStub documentSearcherStub = new DocumentSearcherStub();
-        return ok(template.render(documentSearcherStubForm));
+        return redirect("/indexing");
+    }
+
+    public static Result indexingDocument() {
+        String message = flash("success");
+        Form<IndexingDocumentStub> indexingDocumentStubForm = Form.form(IndexingDocumentStub.class);
+        return ok(views.html.index.render(WELCOME_STRING, indexingDocumentStubForm));
     }
 
     public static Result submit() {
         DynamicForm form = Form.form().bindFromRequest();
-        System.out.println(form.get("documentLocation"));
-        System.out.println(form.get("queryLocation"));
-        System.out.println(form.get("relevantJudgement"));
-        System.out.println(form.get("stopwordLocation"));
+        String documentLocation = form.get("documentLocation");
+        String stopwordLocation = form.get("stopwordLocation");
+        Calculator.TFType.valueOf("dTf");
         System.out.println(form.get("dIdf"));
         System.out.println(form.get("dTf"));
         System.out.println(form.get("dNormalization"));
-        System.out.println(form.get("qIdf"));
-        System.out.println(form.get("qTf"));
-        System.out.println(form.get("qNormalization"));
-        return ok(result.render());
+
+        File documentsFile = Play.application().getFile(documentLocation);
+        File stopwordsFile = Play.application().getFile(stopwordLocation);
+        Option searchOption = new Option(Calculator.TFType.RAW_TF, false, false, false);
+//        appLogic.setSearchOptions(searchOption);
+        //            appLogic.indexDocuments(documentsFile, stopwordsFile, Calculator.TFType.RAW_TF, false, false, false);
+        flash("success", "The file has been created");
+        return redirect("/indexing");
     }
 
-    public static Result indexDocuments() {
-        File documentsFile = Play.application().getFile("dataset/CISI/cisi.all");
-        File stopwordsFile = Play.application().getFile("res/stopwords.txt");
-        try {
-            Option searchOption = new Option(Calculator.TFType.RAW_TF, false, false, false);
-            appLogic.setSearchOptions(searchOption);
-            appLogic.indexDocuments(documentsFile, stopwordsFile, Calculator.TFType.RAW_TF, false, false, false);
-            return ok("index successful");
+    public static void indexDocuments() throws IOException {
 
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ok("index failed");
-        }
     }
 
     public static Result search(String query) {

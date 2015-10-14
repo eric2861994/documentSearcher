@@ -6,8 +6,11 @@
 GET     /                           controllers.Application.index
 POST     /                           controllers.Application.submit
 
-GET     /index-documents            controllers.Application.indexDocuments
 GET     /search/*query              controllers.Application.search(query)
+GET     /indexing                   controllers.Application.indexingDocument
+#
+#GET     /load/stopwords             controllers.Application.loadStopwords
+#GET     /load/documents             controllers.Application.loadDocuments
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)

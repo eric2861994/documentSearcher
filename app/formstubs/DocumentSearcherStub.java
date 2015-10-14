@@ -1,9 +1,6 @@
 package formstubs;
 
-import formstubs.options.IDFOptions;
-import formstubs.options.NormalizationOptions;
-import formstubs.options.TFOptions;
-import play.data.validation.Constraints.Required;
+import stbi.common.util.Calculator;
 
 /**
  * Created by nim_13512065 on 10/10/15.
@@ -14,11 +11,11 @@ public class DocumentSearcherStub {
     private String relevantJudgement;
     private String stopwordLocation;
 
-    private IDFOptions dIdf;
-    private TFOptions dTf;
-    private NormalizationOptions dNormalization;
+    private boolean dIdf;
+    private Calculator.TFType dTf;
+    private boolean dNormalization;
 
-    private IDFOptions qIdf;
-    private TFOptions qTf;
-    private NormalizationOptions qNormalization;
+    private boolean qIdf;
+    private Calculator.TFType qTf;
+    private boolean qNormalization;
 }
