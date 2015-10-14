@@ -3,22 +3,11 @@
 @import views.html.helper.FieldConstructor
 @(title: String)(indexingDocumentForm:Form[IndexingDocumentStub] )
 @implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
-@successMessage = @{flash.get("success")}
-@errorMessage = @{flash.get("error")}
-@main(title = title) {
-    @if(successMessage != null) {
-        <div class="alert alert-success" role="alert"> @successMessage
-        </div>
-    }
-    @if(errorMessage != null) {
-        <div class="alert alert-danger" role="alert"> @errorMessage
-        </div>
-    }
-    @helper.form(action = routes.Application.submit(), 'id -> "myForm") {
+
+@main(title = title){
+    @helper.form(action = routes.Application.postIndexingDocument(), 'id -> "myForm") {
             <div class="row form-horizontal">
                 @helper.inputText(indexingDocumentForm("documentLocation"), '_label -> "Document Location")
-                @*@helper.inputText(indexingDocumentForm("queryLocation"), '_label -> "Query Location")
-                @helper.inputText(indexingDocumentForm("relevantJudgement"), '_label -> "Relevant Judgement")*@
                 @helper.inputText(indexingDocumentForm("stopwordLocation"), '_label -> "StopWord Location")
             </div>
             <div class="row">
@@ -47,4 +36,6 @@
             </div>
         <input type='submit' name='mysubmit' value='Enter' class="btn btn-default" />
     }
+} {
+
 }

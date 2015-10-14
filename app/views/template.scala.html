@@ -17,7 +17,7 @@
     </head>
     <body>
 
-        @helper.form(action = routes.Application.submit(), 'id -> "myForm") {
+        @helper.form(action = routes.Application.postIndexingDocument(), 'id -> "myForm") {
             <div class="col-xs-12">
                 <div class="row form-horizontal">
                     @helper.inputText(documentSearcherForm("documentLocation"), '_label -> "Document Location");

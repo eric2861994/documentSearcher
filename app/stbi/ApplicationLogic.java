@@ -63,13 +63,10 @@ public class ApplicationLogic {
         loader.saveIndex(indexFile, (ModifiedInvertedIndex) index);
     }
 
-    public List<Pair<Double, Integer>> searchQuery(String query) {
+    public List<Pair<Double, Integer>> searchQuery(String query) throws IndexedFileException {
+        if (stopwords == null && index == null) throw new IndexedFileException();
         return searcher.search(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
                 searchOption.isUseNormalization(), searchOption.isUseStemmer());
-    }
-
-    public void performExperiment() {
-
     }
 
     public IndexedDocument getIndexedDocument(int docID) {

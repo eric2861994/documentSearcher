@@ -19,6 +19,7 @@
   "dependencies" : {
     "angular" : "1.4.7",
     "angular-bootstrap" : "0.14.0",
-    "bootstrap" : "3.3.5"
+    "bootstrap" : "3.3.5",
+    "datatables": "1.10.9"
   }
 }

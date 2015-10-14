@@ -1,0 +1,41 @@
+@import formstubs.ExperimentalRetrievalStub
+@import helper.myPlainFieldConstructor
+@import views.html.helper.FieldConstructor
+@(title:String)(experimentalRetrievalForm:Form[ExperimentalRetrievalStub])
+@implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
+
+@main(title = title) {
+    @helper.form(action = routes.Application.search(), 'id -> "myForm") {
+        <div class="row form-horizontal">
+            @helper.inputText(experimentalRetrievalForm("query"), '_label -> "Query")
+            @helper.inputText(experimentalRetrievalForm("stopwordLocation"), '_label -> "Stopword Location")
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <label class="control-label" for="query">Query</label>
+                <div class="form-horizontal">
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("qTf"),
+                        options = views.html.helper.options("RAW_TF"->"Raw", "BINARY_TF"->"Binary", "AUGMENTED_TF"->"Augmented", "LOG_TF"->"Logarithmic"))
+                    </div>
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("qIdf"),
+                        options = views.html.helper.options("FALSE"->"No","TRUE"->"Yes"))
+                    </div>
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("qNormalization"),
+                        options = views.html.helper.options("FALSE"->"No","TRUE"->"Yes"))
+                    </div>
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("qStemmer"),
+                        options = views.html.helper.options("FALSE"->"No","TRUE"->"Yes"))
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <input type='submit' name='submit' value='Enter' class="btn btn-default" />
+    }
+} {
+
+}
