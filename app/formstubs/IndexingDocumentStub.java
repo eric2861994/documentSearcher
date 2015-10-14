@@ -12,4 +12,5 @@ public class IndexingDocumentStub {
     private boolean dIdf;
     private Calculator.TFType dTf;
     private boolean dNormalization;
+    private boolean dStemmer;
 }

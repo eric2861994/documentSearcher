@@ -32,17 +32,22 @@ public class Application extends Controller {
         DynamicForm form = Form.form().bindFromRequest();
         String documentLocation = form.get("documentLocation");
         String stopwordLocation = form.get("stopwordLocation");
-        Calculator.TFType.valueOf("dTf");
-        System.out.println(form.get("dIdf"));
-        System.out.println(form.get("dTf"));
-        System.out.println(form.get("dNormalization"));
+        Calculator.TFType tfType = Calculator.TFType.valueOf(form.get("dTf"));
+        boolean dIdf = Boolean.parseBoolean(form.get("dIdf"));
+        boolean dNormalization = Boolean.parseBoolean(form.get("dNormalization"));
+        boolean dStemmer = Boolean.parseBoolean(form.get("dStemmer"));
 
         File documentsFile = Play.application().getFile(documentLocation);
         File stopwordsFile = Play.application().getFile(stopwordLocation);
-        Option searchOption = new Option(Calculator.TFType.RAW_TF, false, false, false);
-//        appLogic.setSearchOptions(searchOption);
-        //            appLogic.indexDocuments(documentsFile, stopwordsFile, Calculator.TFType.RAW_TF, false, false, false);
-        flash("success", "The file has been created");
+        Option searchOption = new Option(tfType, dIdf, dNormalization, dStemmer);
+        appLogic.setSearchOptions(searchOption);
+        try {
+            appLogic.indexDocuments(documentsFile, stopwordsFile, tfType, dIdf, dNormalization, dStemmer);
+            flash("success", "The file has been created");
+        } catch (IOException e) {
+            flash("error", "The file cannot be created");
+        }
+
         return redirect("/indexing");
     }
 

@@ -27,15 +27,19 @@
                     <div class="form-horizontal">
                         <div class="form-group">
                         @helper.inputRadioGroup(indexingDocumentForm("dTf"),
-                            options = views.html.helper.options("NO_TF"->"No","RAW_TF"->"Raw", "BINARY_TF"->"Binary", "AUGMENTED_TF"->"Augmented", "LOG_TF"->"Logarithmic"))
+                            options = views.html.helper.options("RAW_TF"->"Raw", "BINARY_TF"->"Binary", "AUGMENTED_TF"->"Augmented", "LOG_TF"->"Logarithmic"))
                         </div>
                         <div class="form-group">
                         @helper.inputRadioGroup(indexingDocumentForm("dIdf"),
-                            options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                            options = views.html.helper.options("FALSE"->"No","TRUE"->"Yes"))
                         </div>
                         <div class="form-group">
                         @helper.inputRadioGroup(indexingDocumentForm("dNormalization"),
-                            options = views.html.helper.options("NO"->"No","YES"->"Yes"))
+                            options = views.html.helper.options("FALSE"->"No","TRUE"->"Yes"))
+                        </div>
+                        <div class="form-group">
+                        @helper.inputRadioGroup(indexingDocumentForm("dStemmer"),
+                            options = views.html.helper.options("FALSE"->"No","TRUE"->"Yes"))
                         </div>
                     </div>
                 </div>

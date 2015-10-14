@@ -46,7 +46,6 @@ public class ApplicationLogic {
                                boolean useNormalization, boolean useStemmer) throws IOException {
         List<RawDocument> documents = loader.loadAllDocuments(documentsFile);
 
-        //TODO solve this bug
         loader.loadStopwords(stopwordsFile);
 //        modifiedInvertedIndexer.createIndex();
 
@@ -65,8 +64,8 @@ public class ApplicationLogic {
     }
 
     public List<Pair<Double, Integer>> searchQuery(String query) {
-        return searcher.search(index, query, stopwords, searchOption.tfType, searchOption.useIDF,
-                searchOption.useNormalization, searchOption.useStemmer);
+        return searcher.search(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
+                searchOption.isUseNormalization(), searchOption.isUseStemmer());
     }
 
     public void performExperiment() {
