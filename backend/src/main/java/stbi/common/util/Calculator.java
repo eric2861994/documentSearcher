@@ -12,8 +12,9 @@ import java.util.Map;
 public class Calculator {
     /**
      * Calculate TF Value.
-     * @param type             TFType
-     * @param termFrequency    TermFrequency
+     *
+     * @param type          TFType
+     * @param termFrequency TermFrequency
      * @return TF Value
      */
     public Map<Term, Double> getTFValue(TFType type, TermFrequency termFrequency) {
@@ -40,33 +41,38 @@ public class Calculator {
         return termsWeight;
     }
 
-    private Map<Term, Double> getBinaryTf(TermFrequency termFrequency){
+    private Map<Term, Double> getBinaryTf(TermFrequency termFrequency) {
         Map<Term, Double> termsWeight = new HashMap<>();
-        for(Term term : termFrequency.getTerms()){
+        for (Term term : termFrequency.getTerms()) {
             termsWeight.put(term, 1.0);
         }
+
         return termsWeight;
     }
 
-    private Map<Term, Double> getLogTf(TermFrequency termFrequency){
+    private Map<Term, Double> getLogTf(TermFrequency termFrequency) {
         Map<Term, Double> termsWeight = new HashMap<>();
-        for(Term term : termFrequency.getTerms()){
-            termsWeight.put(term, 1.0+Math.log10(termFrequency.getFrequency(term)));
+        for (Term term : termFrequency.getTerms()) {
+            termsWeight.put(term, 1.0 + Math.log10(termFrequency.getFrequency(term)));
         }
+
         return termsWeight;
     }
 
-    private Map<Term, Double> getAugmentedTf(TermFrequency termFrequency){
+    private Map<Term, Double> getAugmentedTf(TermFrequency termFrequency) {
         Map<Term, Double> termsWeight = new HashMap<>();
+
         double maxTf = 1.0;
         // Get Max Tf
-        for(Term term : termFrequency.getTerms()){
+        for (Term term : termFrequency.getTerms()) {
             if (termFrequency.getFrequency(term) > maxTf) maxTf = termFrequency.getFrequency(term);
         }
+
         // Calculate Augmented Tf
-        for(Term term : termFrequency.getTerms()){
-            termsWeight.put(term, 0.5+0.5*termFrequency.getFrequency(term)/maxTf);
+        for (Term term : termFrequency.getTerms()) {
+            termsWeight.put(term, 0.5 + 0.5 * termFrequency.getFrequency(term) / maxTf);
         }
+
         return termsWeight;
     }
 

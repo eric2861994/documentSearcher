@@ -6,11 +6,14 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import stbi.common.Loader;
 import stbi.common.index.ModifiedInvertedIndex;
+import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 
 import java.io.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
+import java.util.Set;
 
 public class ModifiedInvertedIndexerTest {
 
@@ -39,7 +42,8 @@ public class ModifiedInvertedIndexerTest {
         File documentFile = new File(testConfiguration.getProperty("ADIDocSet"));
         Loader loader = new Loader();
         List<RawDocument> documents = loader.loadAllDocuments(documentFile);
-        ModifiedInvertedIndex index = indexer.createIndex(documents, Calculator.TFType.RAW_TF, false, false);
+        Set<Term> stopwords = new HashSet<>();
+        ModifiedInvertedIndex index = indexer.createIndex(documents, stopwords, Calculator.TFType.RAW_TF, false, false, false);
         System.out.println("Aw yeah!");
     }
 

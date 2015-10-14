@@ -8,7 +8,7 @@ import java.io.Serializable;
 public class Term implements Serializable {
     private String text;
 
-    Term(String _text) {
+    public Term(String _text) {
         text = _text;
     }
 

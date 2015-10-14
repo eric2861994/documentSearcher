@@ -1,11 +1,9 @@
 package stbi.common;
 
+import stbi.common.index.ModifiedInvertedIndex;
 import stbi.indexer.RawDocument;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -13,34 +11,6 @@ import java.util.List;
  * Files Loader.
  */
 public class Loader {
-    /**
-     * Get stopwords from a file.
-     * <p/>
-     * File containing Stopwords is separated by a newline and ends with a newline.
-     *
-     * @param stopwordsFile file containing the stopwords
-     * @return stopwords
-     * @throws IOException this will rarely happen as File is checked before passed to this class
-     */
-    public String[] loadStopwords(File stopwordsFile) throws IOException {
-        FileReader fileReader = new FileReader(stopwordsFile);
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-
-        List<String> stopwords = new ArrayList<>();
-        try {
-            // just return all the stopwords extracted from each line of the file.
-            String stopword;
-            while ((stopword = bufferedReader.readLine()) != null) {
-                stopwords.add(stopword);
-            }
-
-        } finally {
-            bufferedReader.close();
-        }
-
-        return stopwords.toArray(new String[0]);
-    }
-
     /**
      * Load all documents from documentsFile.
      * <p/>
@@ -117,6 +87,89 @@ public class Loader {
         }
 
         return rawDocuments;
+    }
+
+    /**
+     * Get stopwords from a file.
+     * <p/>
+     * File containing Stopwords is separated by a newline and ends with a newline.
+     *
+     * @param stopwordsFile file containing the stopwords
+     * @return stopwords
+     * @throws IOException this will rarely happen as File is checked before passed to this class
+     */
+    public String[] loadStopwords(File stopwordsFile) throws IOException {
+        FileReader fileReader = new FileReader(stopwordsFile);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+
+        List<String> stopwords = new ArrayList<>();
+        try {
+            // just return all the stopwords extracted from each line of the file.
+            String stopword;
+            while ((stopword = bufferedReader.readLine()) != null) {
+                stopwords.add(stopword);
+            }
+
+        } finally {
+            bufferedReader.close();
+        }
+
+        return stopwords.toArray(new String[0]);
+    }
+
+    /**
+     * Save index to file.
+     *
+     * @param indexFile             index file
+     * @param modifiedInvertedIndex index
+     * @throws IOException
+     */
+    public void saveIndex(File indexFile, ModifiedInvertedIndex modifiedInvertedIndex) throws IOException {
+        OutputStream outputStream = new FileOutputStream(indexFile);
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(outputStream);
+
+        ObjectOutputStream objectOutputStream = null;
+        try {
+            objectOutputStream = new ObjectOutputStream(bufferedOutputStream);
+            objectOutputStream.writeObject(modifiedInvertedIndex);
+
+        } finally {
+            if (objectOutputStream != null) {
+                objectOutputStream.close();
+
+            } else {
+                outputStream.close();
+            }
+        }
+    }
+
+    /**
+     * Load index from file
+     *
+     * @param indexFile index file
+     * @return modified inverted index
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public ModifiedInvertedIndex loadIndex(File indexFile) throws IOException, ClassNotFoundException {
+        InputStream inputStream = new FileInputStream(indexFile);
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+
+        ObjectInputStream objectInputStream = null;
+        ModifiedInvertedIndex modifiedInvertedIndex = null;
+        try {
+            objectInputStream = new ObjectInputStream(bufferedInputStream);
+            modifiedInvertedIndex = (ModifiedInvertedIndex) objectInputStream.readObject();
+
+        } finally {
+            if (objectInputStream != null) {
+                objectInputStream.close();
+            } else {
+                inputStream.close();
+            }
+        }
+
+        return modifiedInvertedIndex;
     }
 
     //Raw Document FORMAT;

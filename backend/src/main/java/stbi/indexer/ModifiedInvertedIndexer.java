@@ -3,19 +3,13 @@ package stbi.indexer;
 import stbi.common.IndexedDocument;
 import stbi.common.TermFrequency;
 import stbi.common.index.ModifiedInvertedIndex;
-import stbi.common.term.StringTermStream;
-import stbi.common.term.Term;
+import stbi.common.term.*;
+import stbi.common.term.stemmer.PorterStemmer;
+import stbi.common.term.stemmer.Stemmer;
 import stbi.common.util.Calculator;
-import stbi.common.util.Pair;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Modified Inverted Indexer.
@@ -28,25 +22,31 @@ public class ModifiedInvertedIndexer {
 
     private final Calculator calculator;
 
-    ModifiedInvertedIndexer(Calculator _calculator) {
+    public ModifiedInvertedIndexer(Calculator _calculator) {
         calculator = _calculator;
     }
 
-    ModifiedInvertedIndex createIndex(List<RawDocument> rawDocumentsList, Calculator.TFType tfType, boolean useIDF, boolean useNormalization) throws IOException {
+    public ModifiedInvertedIndex createIndex(List<RawDocument> rawDocumentsList, Set<Term> stopwords, Calculator.TFType tfType, boolean useIDF, boolean useNormalization, boolean useStemmer) throws IOException {
         // load all documents
-        RawDocument[] documents = (RawDocument[]) rawDocumentsList.toArray(new RawDocument[rawDocumentsList.size()]);
+        RawDocument[] documents = rawDocumentsList.toArray(new RawDocument[rawDocumentsList.size()]);
 
         // find term frequency for each document
         TermFrequency[] termFrequencies = new TermFrequency[documents.length];
         for (int docIdx = 0; docIdx < documents.length; docIdx++) {
             RawDocument oneDocument = documents[docIdx];
 
-            // TODO here we assume only the document's body is used in indexing
-            String body = oneDocument.getBody();
-            StringTermStream stringTermStream = new StringTermStream(body);
-            TermFrequency termFrequency = new TermFrequency(stringTermStream);
+            // only title and body is used in indexing
+            String searchString = oneDocument.getAuthor() + " " + oneDocument.getBody();
 
-            termFrequencies[docIdx] = termFrequency;
+            StringTermStream stringTermStream = new StringTermStream(searchString);
+            StopwordTermStream stopwordTermStream = new StopwordTermStream(stringTermStream, stopwords);
+            TermStream termStream = stopwordTermStream;
+            if (useStemmer) {
+                Stemmer porterStemmer = new PorterStemmer();
+                termStream = new StemmingTermStream(stopwordTermStream, porterStemmer);
+            }
+
+            termFrequencies[docIdx] = new TermFrequency(termStream);
         }
 
         // calculate weight using TF
@@ -108,24 +108,23 @@ public class ModifiedInvertedIndexer {
         for (int docIdx = 0; docIdx < documents.length; docIdx++) {
             indexedDocuments[docIdx] = new IndexedDocument(documents[docIdx]);
         }
-        Map<Term, List<Pair<Integer, Double>>> termDocumentWeight = new HashMap<>();
+        Map<Term, Map<Integer, Double>> termDocumentWeight = new HashMap<>();
         for (int docIdx = 0; docIdx < documents.length; docIdx++) {
             Map<Term, Double> documentWeight = documentWeightList.get(docIdx);
             for (Term term : documentWeight.keySet()) {
                 if (termDocumentWeight.containsKey(term)) {
-                    List<Pair<Integer, Double>> previousList = termDocumentWeight.get(term);
-                    previousList.add(new Pair<>(docIdx, documentWeight.get(term)));
+                    Map<Integer, Double> previousMap = termDocumentWeight.get(term);
+                    previousMap.put(docIdx, documentWeight.get(term));
 
                 } else {
-                    List<Pair<Integer, Double>> newList = new ArrayList<Pair<Integer, Double>>();
-                    newList.add(new Pair<>(docIdx, documentWeight.get(term)));
-                    termDocumentWeight.put(term, newList);
+                    Map<Integer, Double> newMap = new HashMap<>();
+                    newMap.put(docIdx, documentWeight.get(term));
+                    termDocumentWeight.put(term, newMap);
                 }
             }
         }
         return new ModifiedInvertedIndex(termDocumentWeight, indexedDocuments);
     }
-
 
 
     /**

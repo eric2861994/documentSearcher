@@ -5,6 +5,7 @@ import stbi.common.term.TermStream;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * Store the frequency of each term.
@@ -13,7 +14,6 @@ public class TermFrequency {
     private Map<Term, Integer> wordFrequency = new HashMap<Term, Integer>();
 
     public TermFrequency(TermStream termStream) {
-
         while (termStream.hasNext()) {
             Term term = termStream.next();
 
@@ -23,7 +23,6 @@ public class TermFrequency {
             }
             wordFrequency.put(term, currentFrequency);
         }
-
     }
 
     public double getFrequency(Term term) {
@@ -31,7 +30,7 @@ public class TermFrequency {
     }
 
     public Term[] getTerms() {
-        return wordFrequency.keySet().toArray(new Term[wordFrequency.keySet().size()]);
+        Set<Term> keyset = wordFrequency.keySet();
+        return keyset.toArray(new Term[keyset.size()]);
     }
-
 }
