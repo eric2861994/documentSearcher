@@ -107,10 +107,12 @@ public class Loader {
                 line = bufferedReader.readLine();
             }
 
-            rawDocuments.add(new RawDocument(id,
-                    title.toString(),
-                    author.toString(),
-                    body.toString()));
+            if (id!=-1) {
+                rawDocuments.add(new RawDocument(id,
+                        title.toString(),
+                        author.toString(),
+                        body.toString()));
+            }
 
         } finally {
             bufferedReader.close();
