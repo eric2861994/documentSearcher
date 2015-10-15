@@ -46,9 +46,6 @@ public class ApplicationLogic {
                                boolean useNormalization, boolean useStemmer) throws IOException {
         List<RawDocument> documents = loader.loadAllDocuments(documentsFile);
 
-        loader.loadStopwords(stopwordsFile);
-//        modifiedInvertedIndexer.createIndex();
-
         // load stopwords
         String[] stopwordsArray = loader.loadStopwords(stopwordsFile);
         Set<Term> stopwordsSet = new HashSet<>();
@@ -64,7 +61,7 @@ public class ApplicationLogic {
     }
 
     public List<Pair<Double, Integer>> searchQuery(String query) throws IndexedFileException {
-        if (stopwords == null && index == null) throw new IndexedFileException();
+        if (stopwords == null && index == null) throw new IndexedFileException(); // TODO ini maksudnya or bukan?
         return searcher.search(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
                 searchOption.isUseNormalization(), searchOption.isUseStemmer());
     }
