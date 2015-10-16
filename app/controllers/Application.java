@@ -39,7 +39,10 @@ public class Application extends Controller {
         } else {
             flash("info", "The index file is not created yet");
         }
-        Form<IndexingDocumentStub> indexingDocumentStubForm = Form.form(IndexingDocumentStub.class).fill(indexingDocumentStub);
+        Form<IndexingDocumentStub> indexingDocumentStubForm = Form.form(IndexingDocumentStub.class);
+        if (indexingDocumentStub != null) {
+            indexingDocumentStubForm = Form.form(IndexingDocumentStub.class).fill(indexingDocumentStub);
+        }
         return ok(views.html.index.render(DOCUMENT_INDEXING_TITLE, indexingDocumentStubForm));
     }
 
@@ -49,10 +52,10 @@ public class Application extends Controller {
 
         String documentLocation = indexingDocumentStub.getDocumentLocation();
         String stopwordLocation = indexingDocumentStub.getStopwordLocation();
-        Calculator.TFType tfType = indexingDocumentStub.getdTf();
-        boolean dIdf = indexingDocumentStub.isdIdf();
-        boolean dNormalization = indexingDocumentStub.isdNormalization();
-        boolean dStemmer = indexingDocumentStub.isdStemmer();
+        Calculator.TFType tfType = indexingDocumentStub.getTf();
+        boolean dIdf = indexingDocumentStub.isUseIdf();
+        boolean dNormalization = indexingDocumentStub.isUseNormalization();
+        boolean dStemmer = indexingDocumentStub.isUseStemmer();
 
         File documentsFile = Play.application().getFile(documentLocation);
         File stopwordsFile = Play.application().getFile(stopwordLocation);
@@ -86,10 +89,10 @@ public class Application extends Controller {
         InteractiveRetrievalStub interactiveRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
 
         String query = interactiveRetrievalStub.getQuery();
-        Calculator.TFType tfType = interactiveRetrievalStub.getqTf();
-        boolean qIdf = interactiveRetrievalStub.isqIdf();
-        boolean qNormalization = interactiveRetrievalStub.isqNormalization();
-        boolean qStemmer = interactiveRetrievalStub.isqStemmer();
+        Calculator.TFType tfType = interactiveRetrievalStub.getTf();
+        boolean qIdf = interactiveRetrievalStub.isUseIdf();
+        boolean qNormalization = interactiveRetrievalStub.isUseNormalization();
+        boolean qStemmer = interactiveRetrievalStub.isUseStemmer();
         Option searchOption = new Option(tfType, qIdf, qNormalization, qStemmer);
         appLogic.setSearchOptions(searchOption);
 
@@ -141,7 +144,8 @@ public class Application extends Controller {
     }
 
     public static Result interactive() {
-        Form<InteractiveRetrievalStub> interactiveRetrievalStubForm = Form.form(InteractiveRetrievalStub.class);
+        InteractiveRetrievalStub interactiveRetrievalStub = appLogic.getInteractiveRetrievalObjectFromJson();
+        Form<InteractiveRetrievalStub> interactiveRetrievalStubForm = Form.form(InteractiveRetrievalStub.class).fill(interactiveRetrievalStub);
         return ok(interactive.render(INTERACTIVE_TITLE, interactiveRetrievalStubForm));
     }
 

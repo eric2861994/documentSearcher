@@ -1,7 +1,8 @@
 {
   "documentLocation" : "a",
-  "dIdf": true,
-  "dTf" : "RAW_TF",
-  "dNormalization" : true,
-  "dStemmer": false
+  "useIdf": true,
+  "tf" : "RAW_TF",
+  "useNormalization" : true,
+  "useStopwords" : true,
+  "useStemmer": false
 }

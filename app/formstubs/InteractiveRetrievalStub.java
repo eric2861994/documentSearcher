@@ -5,6 +5,7 @@ package formstubs;
  */
 public class InteractiveRetrievalStub extends RetrievalStub {
     protected String query;
+    private boolean useStopwords;
 
     public InteractiveRetrievalStub() {
         super();
@@ -23,4 +24,11 @@ public class InteractiveRetrievalStub extends RetrievalStub {
         this.query = query;
     }
 
+    public boolean isUseStopwords() {
+        return useStopwords;
+    }
+
+    public void setUseStopwords(boolean useStopwords) {
+        this.useStopwords = useStopwords;
+    }
 }

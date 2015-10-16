@@ -6,53 +6,53 @@ import stbi.common.util.Calculator;
  * Created by nim_13512065 on 10/15/15.
  */
 public class RetrievalStub extends StopwordsStub {
-    protected boolean qIdf;
-    protected Calculator.TFType qTf;
-    protected boolean qNormalization;
-    protected boolean qStemmer;
+    protected boolean useIdf;
+    protected Calculator.TFType tf;
+    protected boolean useNormalization;
+    protected boolean useStemmer;
 
     public RetrievalStub() {
         super();
+        setTf(Calculator.TFType.RAW_TF);
     }
 
     public RetrievalStub(RetrievalStub retrievalStub){
         super(retrievalStub);
-        setqIdf(retrievalStub.isqIdf());
-        setqTf(retrievalStub.getqTf());
-        setqNormalization(retrievalStub.isqNormalization());
-        setqStemmer(retrievalStub.isqStemmer());
+        setUseIdf(retrievalStub.isUseIdf());
+        setTf(retrievalStub.getTf());
+        setUseNormalization(retrievalStub.isUseNormalization());
+        setUseStemmer(retrievalStub.isUseStemmer());
     }
 
-
-    public boolean isqIdf() {
-        return qIdf;
+    public boolean isUseIdf() {
+        return useIdf;
     }
 
-    public void setqIdf(boolean qIdf) {
-        this.qIdf = qIdf;
+    public void setUseIdf(boolean useIdf) {
+        this.useIdf = useIdf;
     }
 
-    public Calculator.TFType getqTf() {
-        return qTf;
+    public Calculator.TFType getTf() {
+        return tf;
     }
 
-    public void setqTf(Calculator.TFType qTf) {
-        this.qTf = qTf;
+    public void setTf(Calculator.TFType tf) {
+        this.tf = tf;
     }
 
-    public boolean isqNormalization() {
-        return qNormalization;
+    public boolean isUseNormalization() {
+        return useNormalization;
     }
 
-    public void setqNormalization(boolean qNormalization) {
-        this.qNormalization = qNormalization;
+    public void setUseNormalization(boolean useNormalization) {
+        this.useNormalization = useNormalization;
     }
 
-    public boolean isqStemmer() {
-        return qStemmer;
+    public boolean isUseStemmer() {
+        return useStemmer;
     }
 
-    public void setqStemmer(boolean qStemmer) {
-        this.qStemmer = qStemmer;
+    public void setUseStemmer(boolean useStemmer) {
+        this.useStemmer = useStemmer;
     }
 }

@@ -1,10 +1,10 @@
 package stbi;
 
-import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import formstubs.IndexingDocumentStub;
+import formstubs.InteractiveRetrievalStub;
 import formstubs.StopwordsStub;
 import play.Play;
 import play.libs.Json;
@@ -33,6 +33,7 @@ public class ApplicationLogic {
 
     public static final String INDEXING_SETTING_PATH = "res/indexing.json";
     private static final String STOPWORD_PATH = "res/stopwords.json";
+    private static final String RETRIEVAL_QUERY_PATH = "res/retrieval.json";
 
     private final Loader loader = new Loader();
     private final Calculator calculator = new Calculator();
@@ -41,6 +42,7 @@ public class ApplicationLogic {
     private final File indexFile;
     private final File indexSettingFile;
     private final File stopwordFile;
+    private final File interactiveEetrievalQueryFile;
 
     private Index index;
     private Set<Term> stopwords;
@@ -50,10 +52,39 @@ public class ApplicationLogic {
         indexFile = Play.application().getFile("res/index.idx");
         indexSettingFile = Play.application().getFile(INDEXING_SETTING_PATH);
         stopwordFile = Play.application().getFile(STOPWORD_PATH);
+        interactiveEetrievalQueryFile = Play.application().getFile(RETRIEVAL_QUERY_PATH);
     }
 
     public boolean indexFileExists() {
         return indexFile.exists() && !indexFile.isDirectory();
+    }
+
+    public InteractiveRetrievalStub getInteractiveRetrievalObjectFromJson() {
+        InteractiveRetrievalStub interactiveRetrievalStub = new InteractiveRetrievalStub();
+        if(interactiveEetrievalQueryFile.exists() && !interactiveEetrievalQueryFile.isDirectory()) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            BufferedReader fileReader = null;
+
+            try {
+                fileReader = new BufferedReader(
+                        new FileReader(RETRIEVAL_QUERY_PATH));
+                JsonNode json = mapper.readTree(fileReader);
+                interactiveRetrievalStub = Json.fromJson(json, InteractiveRetrievalStub.class);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
+        if (stopwordsStub != null) {
+            interactiveRetrievalStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
+        }
+        return interactiveRetrievalStub;
     }
 
     public IndexingDocumentStub getIndexingDocumentObjectFromJson() {
@@ -67,11 +98,6 @@ public class ApplicationLogic {
                         new FileReader(INDEXING_SETTING_PATH));
                 JsonNode json = mapper.readTree(fileReader);
                 indexingDocumentStub = Json.fromJson(json, IndexingDocumentStub.class);
-
-                StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
-                if (stopwordsStub != null) {
-                    indexingDocumentStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
-                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (JsonProcessingException e) {
@@ -79,6 +105,10 @@ public class ApplicationLogic {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
+        if (stopwordsStub != null) {
+            indexingDocumentStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
         }
         return indexingDocumentStub;
     }
@@ -150,4 +180,6 @@ public class ApplicationLogic {
     public void saveIndexingDocumentSetting(IndexingDocumentStub indexingDocumentStub) throws IOException {
         new ObjectMapper().writeValue(new File(INDEXING_SETTING_PATH), indexingDocumentStub);
     }
+
+   
 }

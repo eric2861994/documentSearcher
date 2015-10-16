@@ -8,26 +8,28 @@
     @helper.form(action = routes.Application.postIndexingDocument(), 'id -> "myForm") {
             <div class="row form-horizontal">
                 @helper.inputText(indexingDocumentForm("documentLocation"), '_label -> "Document Location")
-                @helper.inputText(indexingDocumentForm("stopwordLocation"), '_label -> "StopWord Location")
+                @helper.inputText(indexingDocumentForm("stopwordLocation"), '_label -> "StopWord Location", 'readonly -> "readonly")
+                @helper.inputRadioGroup(indexingDocumentForm("useStopwords"),
+                    options = views.html.helper.options("false"->"No","true"->"Yes"))
             </div>
             <div class="row">
                 <div class="col-xs-12">
                     <label class="control-label" for="document">Document</label>
                     <div class="form-horizontal">
                         <div class="form-group">
-                        @helper.inputRadioGroup(indexingDocumentForm("dTf"),
+                        @helper.inputRadioGroup(indexingDocumentForm("tf"),
                             options = views.html.helper.options("RAW_TF"->"Raw", "BINARY_TF"->"Binary", "AUGMENTED_TF"->"Augmented", "LOG_TF"->"Logarithmic"))
                         </div>
                         <div class="form-group">
-                        @helper.inputRadioGroup(indexingDocumentForm("dIdf"),
+                        @helper.inputRadioGroup(indexingDocumentForm("useIdf"),
                             options = views.html.helper.options("false"->"No","true"->"Yes"))
                         </div>
                         <div class="form-group">
-                        @helper.inputRadioGroup(indexingDocumentForm("dNormalization"),
+                        @helper.inputRadioGroup(indexingDocumentForm("useNormalization"),
                             options = views.html.helper.options("false"->"No","true"->"Yes"))
                         </div>
                         <div class="form-group">
-                        @helper.inputRadioGroup(indexingDocumentForm("dStemmer"),
+                        @helper.inputRadioGroup(indexingDocumentForm("useStemmer"),
                             options = views.html.helper.options("false"->"No","true"->"Yes"))
                         </div>
                     </div>

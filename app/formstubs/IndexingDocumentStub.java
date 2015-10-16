@@ -9,11 +9,13 @@ import stbi.common.util.Calculator;
 public class IndexingDocumentStub extends StopwordsStub {
     private String documentLocation;
 
-    private boolean dIdf;
+    private boolean useIdf;
     @Constraints.Required
-    private Calculator.TFType dTf;
-    private boolean dNormalization;
-    private boolean dStemmer;
+    private Calculator.TFType tf;
+    private boolean useNormalization;
+    private boolean useStemmer;
+
+    private boolean useStopwords;
 
     //DONT REMOVE THIS CONSTRUCTOR
     public IndexingDocumentStub() {
@@ -23,10 +25,10 @@ public class IndexingDocumentStub extends StopwordsStub {
     public IndexingDocumentStub(String documentLocation, String stopwordLocation, Calculator.TFType tfType, boolean dIdf, boolean dNormalization, boolean dStemmer) {
         setDocumentLocation(documentLocation);
         setStopwordLocation(stopwordLocation);
-        setdIdf(dIdf);
-        setdTf(tfType);
-        setdNormalization(dNormalization);
-        setdStemmer(dStemmer);
+        setUseIdf(dIdf);
+        setTf(tfType);
+        setUseNormalization(dNormalization);
+        setUseStemmer(dStemmer);
     }
 
     public String getDocumentLocation() {
@@ -37,35 +39,43 @@ public class IndexingDocumentStub extends StopwordsStub {
         this.documentLocation = documentLocation;
     }
 
-    public boolean isdIdf() {
-        return dIdf;
+    public boolean isUseIdf() {
+        return useIdf;
     }
 
-    public void setdIdf(boolean dIdf) {
-        this.dIdf = dIdf;
+    public void setUseIdf(boolean useIdf) {
+        this.useIdf = useIdf;
     }
 
-    public Calculator.TFType getdTf() {
-        return dTf;
+    public Calculator.TFType getTf() {
+        return tf;
     }
 
-    public void setdTf(Calculator.TFType dTf) {
-        this.dTf = dTf;
+    public void setTf(Calculator.TFType tf) {
+        this.tf = tf;
     }
 
-    public boolean isdNormalization() {
-        return dNormalization;
+    public boolean isUseNormalization() {
+        return useNormalization;
     }
 
-    public void setdNormalization(boolean dNormalization) {
-        this.dNormalization = dNormalization;
+    public void setUseNormalization(boolean useNormalization) {
+        this.useNormalization = useNormalization;
     }
 
-    public boolean isdStemmer() {
-        return dStemmer;
+    public boolean isUseStemmer() {
+        return useStemmer;
     }
 
-    public void setdStemmer(boolean dStemmer) {
-        this.dStemmer = dStemmer;
+    public void setUseStemmer(boolean useStemmer) {
+        this.useStemmer = useStemmer;
+    }
+
+    public boolean isUseStopwords() {
+        return useStopwords;
+    }
+
+    public void setUseStopwords(boolean useStopwords) {
+        this.useStopwords = useStopwords;
     }
 }
