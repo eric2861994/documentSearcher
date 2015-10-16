@@ -2,19 +2,20 @@ package stbi.common.index;
 
 import stbi.common.IndexedDocument;
 import stbi.common.term.Term;
-import stbi.searcher.QueryVector;
+
+import java.util.Map;
 
 /**
  * Index interface. The implementation can vary.
  */
 public interface Index {
     /**
-     * Get all the documents that contains at least one term in terms.
+     * Get all ids of the document that contains at least one term in terms.
      *
-     * @param terms    terms array
-     * @return all documents containing at least one term in terms
+     * @param terms terms array
+     * @return all ids of the document that contains at least one term in terms
      */
-    IndexedDocument[] getDocuments(Term[] terms);
+    Integer[] getDocumentIDs(Term[] terms);
 
     /**
      * Get the number of documents in index.
@@ -30,5 +31,20 @@ public interface Index {
      */
     int getDocumentCount(Term term);
 
-    double getSimilarity(QueryVector query, IndexedDocument document);
+    /**
+     * Get the similarity of query against document with docID.
+     *
+     * @param query query
+     * @param docID document ID
+     * @return similarity
+     */
+    double getSimilarity(Map<Term, Double> query, Integer docID);
+
+    /**
+     * Get indexed document with id docID
+     *
+     * @param docID document id
+     * @return indexed document
+     */
+    IndexedDocument getIndexedDocument(int docID);
 }

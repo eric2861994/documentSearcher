@@ -3,16 +3,13 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="@elements.id"> @elements.label</label>
     <div class="col-sm-9">
-
         @if(elements.input.toString().contains("class=")) {
-
             @Html(elements.input.toString().replaceFirst("(class=[\"'])", "$1form-control "))
-
         } else {
-
             @Html(elements.input.toString().replaceFirst("(<\\w+ )", "$1class=\"form-control\" "))
-
         }
+        <span class="errors">@elements.errors.mkString(", ")</span>
+        <span class="help">@elements.infos.mkString(", ")</span>
         @*<input type="text" class="form-control" id="@id" placeholder="@name">*@
     </div>
 </div>

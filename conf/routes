@@ -4,10 +4,21 @@
 
 # Home page
 GET     /                           controllers.Application.index
-POST     /                           controllers.Application.submit
 
-GET     /load/stopwords             controllers.Application.loadStopwords
-GET     /load/documents             controllers.Application.loadDocuments
+GET     /search              controllers.Application.search
+
+GET     /experimental               controllers.Application.experimental
+GET     /interactive                controllers.Application.interactive
+
+GET     /indexing                   controllers.Application.indexingDocument
+POST     /indexing                  controllers.Application.postIndexingDocument
+#
+#GET     /load/stopwords             controllers.Application.loadStopwords
+#GET     /load/documents             controllers.Application.loadDocuments
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.at(path="/public", file)
+
+
+#testing
+GET     /testresult                 controllers.Application.testResult

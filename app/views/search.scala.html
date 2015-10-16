@@ -1,0 +1,39 @@
+@(title:String = "Result")(list:java.util.List[stbi.common.util.Pair[java.lang.Double,Integer]])
+
+@main(title = title) {
+    <table id="example" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Similarity</th>
+                <th>DocumentID</th>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr>
+                <th>Similarity</th>
+                <th>DocumentID</th>
+            </tr>
+        </tfoot>
+
+        <tbody>
+            @for(p <- list) {
+                <tr>
+                    <td>@p.first</td>
+                    <td>@p.second</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+} {
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#example').DataTable({
+                "paging":   true,
+                "ordering": true,
+                "info":     true,
+                "order": [[ 0, "desc" ]]
+            });
+        } );
+    </script>
+}
