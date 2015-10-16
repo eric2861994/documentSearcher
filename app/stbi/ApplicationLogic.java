@@ -1,6 +1,11 @@
 package stbi;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import formstubs.IndexingDocumentStub;
 import play.Play;
+import play.libs.Json;
 import stbi.common.IndexedDocument;
 import stbi.common.Loader;
 import stbi.common.Option;
@@ -13,8 +18,7 @@ import stbi.indexer.ModifiedInvertedIndexer;
 import stbi.indexer.RawDocument;
 import stbi.searcher.Searcher;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -24,11 +28,15 @@ import java.util.Set;
  * Handle all application features.
  */
 public class ApplicationLogic {
+
+    public static final String INDEXING_SETTING_PATH = "res/indexing.json";
+
     private final Loader loader = new Loader();
     private final Calculator calculator = new Calculator();
     private final ModifiedInvertedIndexer modifiedInvertedIndexer = new ModifiedInvertedIndexer(calculator);
     private final Searcher searcher = new Searcher(calculator);
     private final File indexFile;
+    private final File indexSettingFile;
 
     private Index index;
     private Set<Term> stopwords;
@@ -36,8 +44,34 @@ public class ApplicationLogic {
 
     private ApplicationLogic() {
         indexFile = Play.application().getFile("res/index.idx");
+        indexSettingFile = Play.application().getFile(INDEXING_SETTING_PATH);
     }
 
+    public boolean indexFileExists() {
+        return indexFile.exists() && !indexFile.isDirectory();
+    }
+
+    public IndexingDocumentStub getIndexingDocumentObjectFromJson() {
+        IndexingDocumentStub indexingDocumentStub = null;
+        if(indexSettingFile.exists() && !indexSettingFile.isDirectory()) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            BufferedReader fileReader = null;
+            try {
+                fileReader = new BufferedReader(
+                        new FileReader(INDEXING_SETTING_PATH));
+                JsonNode json = mapper.readTree(fileReader);
+                indexingDocumentStub = Json.fromJson(json, IndexingDocumentStub.class);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return indexingDocumentStub;
+    }
     public void setSearchOptions(Option _searchOption) {
         searchOption = _searchOption;
     }

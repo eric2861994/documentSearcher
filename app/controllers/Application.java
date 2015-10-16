@@ -1,9 +1,11 @@
 package controllers;
 
-import formstubs.ExperimentalRetrievalStub;
+import com.fasterxml.jackson.databind.JsonNode;
+import formstubs.InteractiveRetrievalStub;
 import formstubs.IndexingDocumentStub;
 import play.Play;
 import play.data.Form;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import stbi.ApplicationLogic;
@@ -11,24 +13,32 @@ import stbi.IndexedFileException;
 import stbi.common.Option;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
-import views.html.experimental;
+import views.html.interactive;
 import views.html.search;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Application extends Controller {
     private static final String DOCUMENT_INDEXING_TITLE = "Document Indexing";
     private static final String EXPERIMENTAL_TITLE = "Experimental";
+    private static final String INTERACTIVE_TITLE = "Experimental";
+
 
     public static Result index() {
         return redirect("/indexing");
     }
 
-    public static Result indexingDocument() {
-        Form<IndexingDocumentStub> indexingDocumentStubForm = Form.form(IndexingDocumentStub.class);
+    public static Result indexingDocument() throws IOException {
+        IndexingDocumentStub indexingDocumentStub = appLogic.getIndexingDocumentObjectFromJson();
+        boolean idxFileExists = appLogic.indexFileExists();
+        if (idxFileExists) {
+            flash("info", "The index file exists");
+        } else {
+            flash("info", "The index file is not created yet");
+        }
+        Form<IndexingDocumentStub> indexingDocumentStubForm = Form.form(IndexingDocumentStub.class).fill(indexingDocumentStub);
         return ok(views.html.index.render(DOCUMENT_INDEXING_TITLE, indexingDocumentStubForm));
     }
 
@@ -49,7 +59,9 @@ public class Application extends Controller {
         try {
             appLogic.indexDocuments(documentsFile, stopwordsFile, tfType, dIdf, dNormalization, dStemmer);
             flash("success", "The file has been created");
-
+            JsonNode myJson = Json.toJson(indexingDocumentStub);
+            PrintWriter out = new PrintWriter(ApplicationLogic.INDEXING_SETTING_PATH);
+            out.println(myJson);
         } catch (IOException e) {
             flash("error", "The file cannot be created " + "(" + e.getMessage() + ")");
         }
@@ -72,14 +84,14 @@ public class Application extends Controller {
      * @return
      */
     public static Result search() {
-        Form<ExperimentalRetrievalStub> experimentalRetrievalStubForm = Form.form(ExperimentalRetrievalStub.class);
-        ExperimentalRetrievalStub experimentalRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
+        Form<InteractiveRetrievalStub> experimentalRetrievalStubForm = Form.form(InteractiveRetrievalStub.class);
+        InteractiveRetrievalStub interactiveRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
 
-        String query = experimentalRetrievalStub.getQuery();
-        Calculator.TFType tfType = experimentalRetrievalStub.getqTf();
-        boolean qIdf = experimentalRetrievalStub.isqIdf();
-        boolean qNormalization = experimentalRetrievalStub.isqNormalization();
-        boolean qStemmer = experimentalRetrievalStub.isqStemmer();
+        String query = interactiveRetrievalStub.getQuery();
+        Calculator.TFType tfType = interactiveRetrievalStub.getqTf();
+        boolean qIdf = interactiveRetrievalStub.isqIdf();
+        boolean qNormalization = interactiveRetrievalStub.isqNormalization();
+        boolean qStemmer = interactiveRetrievalStub.isqStemmer();
         Option searchOption = new Option(tfType, qIdf, qNormalization, qStemmer);
         appLogic.setSearchOptions(searchOption);
 
@@ -127,11 +139,11 @@ public class Application extends Controller {
     public static final ApplicationLogic appLogic = ApplicationLogic.getInstance();
 
     public static Result experimental() {
-        Form<ExperimentalRetrievalStub> experimentalRetrievalStubForm = Form.form(ExperimentalRetrievalStub.class);
-        return ok(experimental.render(EXPERIMENTAL_TITLE, experimentalRetrievalStubForm));
+        return play.mvc.Results.TODO;
     }
 
     public static Result interactive() {
-        return play.mvc.Results.TODO;
+        Form<InteractiveRetrievalStub> interactiveRetrievalStubForm = Form.form(InteractiveRetrievalStub.class);
+        return ok(interactive.render(INTERACTIVE_TITLE, interactiveRetrievalStubForm));
     }
 }

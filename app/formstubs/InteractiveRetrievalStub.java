@@ -3,18 +3,18 @@ package formstubs;
 /**
  * Created by nim_13512065 on 10/15/15.
  */
-public class ExperimentalRetrievalStub extends RetrievalStub {
+public class InteractiveRetrievalStub extends RetrievalStub {
     protected String query;
     protected String stopwordLocation;
 
-    public ExperimentalRetrievalStub() {
+    public InteractiveRetrievalStub() {
         super();
     }
 
-    public ExperimentalRetrievalStub(ExperimentalRetrievalStub experimentalRetrievalStub) {
-        super(experimentalRetrievalStub);
-        setQuery(experimentalRetrievalStub.getQuery());
-        setStopwordLocation(experimentalRetrievalStub.getStopwordLocation());
+    public InteractiveRetrievalStub(InteractiveRetrievalStub interactiveRetrievalStub) {
+        super(interactiveRetrievalStub);
+        setQuery(interactiveRetrievalStub.getQuery());
+        setStopwordLocation(interactiveRetrievalStub.getStopwordLocation());
     }
 
     public String getQuery() {

@@ -1,6 +1,7 @@
 @(title: String)(content: Html)(script:Html)
 @successMessage = @{flash.get("success")}
 @errorMessage = @{flash.get("error")}
+@infoMessage = @{flash.get("info")}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -46,6 +47,10 @@
                             }
                             @if(errorMessage != null) {
                                 <div class="alert alert-danger" role="alert"> @errorMessage
+                                </div>
+                            }
+                            @if(infoMessage != null) {
+                                <div class="alert alert-info" role="alert"> @infoMessage
                                 </div>
                             }
                             @content
