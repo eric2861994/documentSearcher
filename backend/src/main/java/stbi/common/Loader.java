@@ -59,7 +59,6 @@ public class Loader {
                 } else {
                     switch (currentSection) {
                         case SECTION_TITLE:
-                            if (!title.toString().equals((""))) title.append("\n");
                             title.append(line);
                             break;
                         case SECTION_AUTHOR:
