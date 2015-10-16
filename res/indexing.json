@@ -1,6 +1,5 @@
 {
   "documentLocation" : "a",
-  "stopwordLocation" : "b",
   "dIdf": true,
   "dTf" : "RAW_TF",
   "dNormalization" : true,

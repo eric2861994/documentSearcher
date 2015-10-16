@@ -1,9 +1,11 @@
 package stbi;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import formstubs.IndexingDocumentStub;
+import formstubs.StopwordsStub;
 import play.Play;
 import play.libs.Json;
 import stbi.common.IndexedDocument;
@@ -30,6 +32,7 @@ import java.util.Set;
 public class ApplicationLogic {
 
     public static final String INDEXING_SETTING_PATH = "res/indexing.json";
+    private static final String STOPWORD_PATH = "res/stopwords.json";
 
     private final Loader loader = new Loader();
     private final Calculator calculator = new Calculator();
@@ -37,6 +40,7 @@ public class ApplicationLogic {
     private final Searcher searcher = new Searcher(calculator);
     private final File indexFile;
     private final File indexSettingFile;
+    private final File stopwordFile;
 
     private Index index;
     private Set<Term> stopwords;
@@ -45,6 +49,7 @@ public class ApplicationLogic {
     private ApplicationLogic() {
         indexFile = Play.application().getFile("res/index.idx");
         indexSettingFile = Play.application().getFile(INDEXING_SETTING_PATH);
+        stopwordFile = Play.application().getFile(STOPWORD_PATH);
     }
 
     public boolean indexFileExists() {
@@ -62,6 +67,11 @@ public class ApplicationLogic {
                         new FileReader(INDEXING_SETTING_PATH));
                 JsonNode json = mapper.readTree(fileReader);
                 indexingDocumentStub = Json.fromJson(json, IndexingDocumentStub.class);
+
+                StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
+                if (stopwordsStub != null) {
+                    indexingDocumentStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
+                }
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (JsonProcessingException e) {
@@ -72,6 +82,29 @@ public class ApplicationLogic {
         }
         return indexingDocumentStub;
     }
+
+    public StopwordsStub getStopwordsDocumentObjectFromJson() {
+        StopwordsStub stopwordsStub = null;
+        if(stopwordFile.exists() && !stopwordFile.isDirectory()) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            BufferedReader fileReader = null;
+            try {
+                fileReader = new BufferedReader(
+                        new FileReader(STOPWORD_PATH));
+                JsonNode json = mapper.readTree(fileReader);
+                stopwordsStub = Json.fromJson(json, StopwordsStub.class);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return stopwordsStub;
+    }
+    
     public void setSearchOptions(Option _searchOption) {
         searchOption = _searchOption;
     }
@@ -108,5 +141,13 @@ public class ApplicationLogic {
 
     public static ApplicationLogic getInstance() {
         return oneInstance;
+    }
+
+    public void saveStopwordsLocation(StopwordsStub stopwordsStub) throws IOException {
+        new ObjectMapper().writeValue(new File(STOPWORD_PATH), stopwordsStub);
+    }
+
+    public void saveIndexingDocumentSetting(IndexingDocumentStub indexingDocumentStub) throws IOException {
+        new ObjectMapper().writeValue(new File(INDEXING_SETTING_PATH), indexingDocumentStub);
     }
 }

@@ -6,9 +6,8 @@ import stbi.common.util.Calculator;
 /**
  * Created by nim_13512065 on 10/15/15.
  */
-public class IndexingDocumentStub {
+public class IndexingDocumentStub extends StopwordsStub {
     private String documentLocation;
-    private String stopwordLocation;
 
     private boolean dIdf;
     @Constraints.Required
@@ -18,7 +17,7 @@ public class IndexingDocumentStub {
 
     //DONT REMOVE THIS CONSTRUCTOR
     public IndexingDocumentStub() {
-
+        super();
     }
 
     public IndexingDocumentStub(String documentLocation, String stopwordLocation, Calculator.TFType tfType, boolean dIdf, boolean dNormalization, boolean dStemmer) {
@@ -36,14 +35,6 @@ public class IndexingDocumentStub {
 
     public void setDocumentLocation(String documentLocation) {
         this.documentLocation = documentLocation;
-    }
-
-    public String getStopwordLocation() {
-        return stopwordLocation;
-    }
-
-    public void setStopwordLocation(String stopwordLocation) {
-        this.stopwordLocation = stopwordLocation;
     }
 
     public boolean isdIdf() {

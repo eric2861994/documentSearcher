@@ -1,0 +1,15 @@
+@import helper.myPlainFieldConstructor
+@import views.html.helper.FieldConstructor
+@import formstubs.StopwordsStub
+@(title: String)(stopwordsFormStub:Form[StopwordsStub] )
+@implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
+@main(title = title){
+    @helper.form(action = routes.Application.postStopwords(), 'id -> "myForm") {
+        <div class="row form-horizontal">
+            @helper.inputText(stopwordsFormStub("stopwordLocation"), '_label -> "StopWord Location")
+        </div>
+        <input type='submit' name='mysubmit' value='Save' class="btn btn-default" />
+    }
+} {
+
+}

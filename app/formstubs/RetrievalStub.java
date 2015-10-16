@@ -5,17 +5,18 @@ import stbi.common.util.Calculator;
 /**
  * Created by nim_13512065 on 10/15/15.
  */
-public class RetrievalStub {
+public class RetrievalStub extends StopwordsStub {
     protected boolean qIdf;
     protected Calculator.TFType qTf;
     protected boolean qNormalization;
     protected boolean qStemmer;
 
     public RetrievalStub() {
-
+        super();
     }
 
     public RetrievalStub(RetrievalStub retrievalStub){
+        super(retrievalStub);
         setqIdf(retrievalStub.isqIdf());
         setqTf(retrievalStub.getqTf());
         setqNormalization(retrievalStub.isqNormalization());

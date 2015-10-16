@@ -5,7 +5,6 @@ package formstubs;
  */
 public class InteractiveRetrievalStub extends RetrievalStub {
     protected String query;
-    protected String stopwordLocation;
 
     public InteractiveRetrievalStub() {
         super();
@@ -14,7 +13,6 @@ public class InteractiveRetrievalStub extends RetrievalStub {
     public InteractiveRetrievalStub(InteractiveRetrievalStub interactiveRetrievalStub) {
         super(interactiveRetrievalStub);
         setQuery(interactiveRetrievalStub.getQuery());
-        setStopwordLocation(interactiveRetrievalStub.getStopwordLocation());
     }
 
     public String getQuery() {
@@ -25,11 +23,4 @@ public class InteractiveRetrievalStub extends RetrievalStub {
         this.query = query;
     }
 
-    public String getStopwordLocation() {
-        return stopwordLocation;
-    }
-
-    public void setStopwordLocation(String stopwordLocation) {
-        this.stopwordLocation = stopwordLocation;
-    }
 }

@@ -1,11 +1,10 @@
 package controllers;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import formstubs.InteractiveRetrievalStub;
 import formstubs.IndexingDocumentStub;
+import formstubs.StopwordsStub;
 import play.Play;
 import play.data.Form;
-import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import stbi.ApplicationLogic;
@@ -15,6 +14,7 @@ import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
 import views.html.interactive;
 import views.html.search;
+import views.html.stopwords;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -24,6 +24,7 @@ public class Application extends Controller {
     private static final String DOCUMENT_INDEXING_TITLE = "Document Indexing";
     private static final String EXPERIMENTAL_TITLE = "Experimental";
     private static final String INTERACTIVE_TITLE = "Experimental";
+    private static final String STOPWORDS_TITLE = "Stopwords";
 
 
     public static Result index() {
@@ -59,9 +60,6 @@ public class Application extends Controller {
         try {
             appLogic.indexDocuments(documentsFile, stopwordsFile, tfType, dIdf, dNormalization, dStemmer);
             flash("success", "The file has been created");
-            JsonNode myJson = Json.toJson(indexingDocumentStub);
-            PrintWriter out = new PrintWriter(ApplicationLogic.INDEXING_SETTING_PATH);
-            out.println(myJson);
         } catch (IOException e) {
             flash("error", "The file cannot be created " + "(" + e.getMessage() + ")");
         }
@@ -145,5 +143,28 @@ public class Application extends Controller {
     public static Result interactive() {
         Form<InteractiveRetrievalStub> interactiveRetrievalStubForm = Form.form(InteractiveRetrievalStub.class);
         return ok(interactive.render(INTERACTIVE_TITLE, interactiveRetrievalStubForm));
+    }
+
+    public static Result stopwords() {
+        StopwordsStub stopwordsStub = appLogic.getStopwordsDocumentObjectFromJson();
+        Form<StopwordsStub> interactiveRetrievalStubForm = Form.form(StopwordsStub.class);
+        if (stopwordsStub != null) {
+            interactiveRetrievalStubForm = Form.form(StopwordsStub.class).fill(stopwordsStub);
+        }
+        return ok(stopwords.render(STOPWORDS_TITLE, interactiveRetrievalStubForm));
+    }
+
+    public static Result postStopwords() {
+        Form<StopwordsStub> stopwordsStubForm = Form.form(StopwordsStub.class);
+        StopwordsStub stopwordsStub = stopwordsStubForm.bindFromRequest().get();
+        try {
+            appLogic.saveStopwordsLocation(stopwordsStub);
+            flash("success", "The stopwords has been saved");
+            return redirect("/indexing");
+        } catch (IOException e) {
+            e.printStackTrace();
+            flash("error", "The stopwords cannot be saved");
+            return badRequest();
+        }
     }
 }
