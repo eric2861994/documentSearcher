@@ -8,6 +8,8 @@ GET     /                           controllers.Application.index
 GET     /search              controllers.Application.search
 
 GET     /experimental               controllers.Application.experimental
+GET     /experimental               controllers.Application.searchexperimental
+
 GET     /interactive                controllers.Application.interactive
 
 GET     /indexing                   controllers.Application.indexingDocument
@@ -24,4 +26,5 @@ GET     /assets/*file               controllers.Assets.at(path="/public", file)
 
 
 #testing
-GET     /testresult                 controllers.Application.testResult
+GET     /testresultinteractive      controllers.Application.testResultInteractive
+GET     /testresultexperimental      controllers.Application.testResultExperimental

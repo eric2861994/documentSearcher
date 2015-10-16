@@ -1,5 +1,6 @@
 package controllers;
 
+import formstubs.ExperimentalRetrievalStub;
 import formstubs.InteractiveRetrievalStub;
 import formstubs.IndexingDocumentStub;
 import formstubs.StopwordsStub;
@@ -8,13 +9,12 @@ import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
 import stbi.ApplicationLogic;
+import stbi.ExperimentalResult;
 import stbi.IndexedFileException;
 import stbi.common.Option;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
-import views.html.interactive;
-import views.html.search;
-import views.html.stopwords;
+import views.html.*;
 
 import java.io.*;
 import java.util.ArrayList;
@@ -23,10 +23,11 @@ import java.util.List;
 public class Application extends Controller {
     private static final String DOCUMENT_INDEXING_TITLE = "Document Indexing";
     private static final String EXPERIMENTAL_TITLE = "Experimental";
-    private static final String INTERACTIVE_TITLE = "Experimental";
+    private static final String INTERACTIVE_TITLE = "Interactive";
     private static final String STOPWORDS_TITLE = "Stopwords";
 
-
+    public static final ApplicationLogic appLogic = ApplicationLogic.getInstance();
+    
     public static Result index() {
         return redirect("/indexing");
     }
@@ -70,12 +71,12 @@ public class Application extends Controller {
         return redirect("/indexing");
     }
 
-    public static Result testResult() {
+    public static Result testResultInteractive() {
         List<Pair<Double, Integer>> ret = new ArrayList<>();
         ret.add(new Pair<>(10.2, 10));
         ret.add(new Pair<>(3.4, 23));
         ret.add(new Pair<>(1.2, 5));
-        return ok(search.render("TESTING", ret));
+        return ok(interactivesearch.render("TESTING", ret));
     }
 
     /**
@@ -125,7 +126,7 @@ public class Application extends Controller {
                 stringBuilder.append(similarityDocID.first);
                 stringBuilder.append('\n');
             }
-            return ok(search.render("RESULT", similarityDocIDList));
+            return ok(interactivesearch.render("RESULT", similarityDocIDList));
 
         } catch (IndexedFileException e) {
             flash("error", "The file has not been indexed yet ");
@@ -133,14 +134,21 @@ public class Application extends Controller {
             TODO return not_ok(), this return value below should not return ok
             because indexed file exception happened
             */
-            return ok(search.render("RESULT", similarityDocIDList));
+            return ok(interactivesearch.render("RESULT", similarityDocIDList));
         }
     }
 
-    public static final ApplicationLogic appLogic = ApplicationLogic.getInstance();
-
     public static Result experimental() {
-        return play.mvc.Results.TODO;
+        ExperimentalRetrievalStub experimentalRetrievalStub = appLogic.getExperimentalRetrievalObjectFromJson();
+        Form<ExperimentalRetrievalStub> experimentalRetrievalStubForm = Form.form(ExperimentalRetrievalStub.class).fill(experimentalRetrievalStub);
+        return ok(experimental.render(EXPERIMENTAL_TITLE, experimentalRetrievalStubForm));
+    }
+
+
+    public static Result testResultExperimental() {
+        List<ExperimentalResult> ret = new ArrayList<ExperimentalResult>();
+        ret.add(new ExperimentalResult(1.0,2,"ABC",1.0,1.0));
+        return ok(experimentalsearch.render("TESTING",ret));
     }
 
     public static Result interactive() {
@@ -170,5 +178,10 @@ public class Application extends Controller {
             flash("error", "The stopwords cannot be saved");
             return badRequest();
         }
+    }
+
+    public static Result searchexperimental() {
+        //TODO lakukan seperti test testResultExperimental
+        return play.mvc.Results.TODO;
     }
 }

@@ -1,0 +1,46 @@
+@import stbi.ExperimentalResult
+@(title:String = "Result")(list:java.util.List[ExperimentalResult])
+
+@main(title = title) {
+    <table id="example" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Similarity</th>
+                <th>Document Name</th>
+                <th>Precision</th>
+                <th>Recall</th>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr>
+                <th>Similarity</th>
+                <th>Document Name</th>
+                <th>Precision</th>
+                <th>Recall</th>
+            </tr>
+        </tfoot>
+
+        <tbody>
+            @for(p <- list) {
+                <tr>
+                    <td>@p.getSimilarity()</td>
+                    <td>@p.getDocumentName()</td>
+                    <td>@p.getPrecision()</td>
+                    <td>@p.getRecall()</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+} {
+    <script type="text/javascript">
+        $(document).ready(function() {
+            $('#example').DataTable({
+                "paging":   true,
+                "ordering": true,
+                "info":     true,
+                "order": [[ 0, "desc" ]]
+            });
+        } );
+    </script>
+}

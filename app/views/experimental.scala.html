@@ -1,0 +1,43 @@
+@import formstubs.ExperimentalRetrievalStub
+@import helper.{FieldConstructor, myPlainFieldConstructor}
+@(title:String)(experimentalRetrievalForm:Form[ExperimentalRetrievalStub])
+@implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
+
+@main(title = title) {
+    @helper.form(action = routes.Application.searchexperimental(), 'id -> "myForm") {
+        <div class="row form-horizontal">
+            @helper.inputText(experimentalRetrievalForm("query"), '_label -> "Query")
+            @helper.inputText(experimentalRetrievalForm("stopwordLocation"), '_label -> "Stopword Location",'readonly -> "readonly")
+            @helper.inputRadioGroup(experimentalRetrievalForm("useStopwords"),
+                options = views.html.helper.options("false"->"No","true"->"Yes"))
+            @helper.inputText(experimentalRetrievalForm("relevantJudgementLocation"), '_label -> "Relevant Judgement")
+        </div>
+        <div class="row">
+            <div class="col-xs-12">
+                <label class="control-label" for="query">Query</label>
+                <div class="form-horizontal">
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("tf"),
+                        options = views.html.helper.options("RAW_TF"->"Raw", "BINARY_TF"->"Binary", "AUGMENTED_TF"->"Augmented", "LOG_TF"->"Logarithmic"))
+                    </div>
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("useIdf"),
+                        options = views.html.helper.options("false"->"No","true"->"Yes"))
+                    </div>
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("useNormalization"),
+                        options = views.html.helper.options("false"->"No","true"->"Yes"))
+                    </div>
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("useStemmer"),
+                        options = views.html.helper.options("false"->"No","true"->"Yes"))
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <input type='submit' name='submit' value='Enter' class="btn btn-default" />
+    }
+} {
+
+}

@@ -3,6 +3,7 @@ package stbi;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import formstubs.ExperimentalRetrievalStub;
 import formstubs.IndexingDocumentStub;
 import formstubs.InteractiveRetrievalStub;
 import formstubs.StopwordsStub;
@@ -33,7 +34,8 @@ public class ApplicationLogic {
 
     public static final String INDEXING_SETTING_PATH = "res/indexing.json";
     private static final String STOPWORD_PATH = "res/stopwords.json";
-    private static final String RETRIEVAL_QUERY_PATH = "res/retrieval.json";
+    private static final String INTERACTIVE_RETRIEVAL_PATH = "res/interactive.json";
+    private static final String EXPERIMENTAL_RETRIEVAL_PATH = "res/experimental.json";
 
     private final Loader loader = new Loader();
     private final Calculator calculator = new Calculator();
@@ -42,7 +44,8 @@ public class ApplicationLogic {
     private final File indexFile;
     private final File indexSettingFile;
     private final File stopwordFile;
-    private final File interactiveEetrievalQueryFile;
+    private final File interactiveRetrievalQueryFile;
+    private final File experimentalRetrievalQueryFile;
 
     private Index index;
     private Set<Term> stopwords;
@@ -52,7 +55,8 @@ public class ApplicationLogic {
         indexFile = Play.application().getFile("res/index.idx");
         indexSettingFile = Play.application().getFile(INDEXING_SETTING_PATH);
         stopwordFile = Play.application().getFile(STOPWORD_PATH);
-        interactiveEetrievalQueryFile = Play.application().getFile(RETRIEVAL_QUERY_PATH);
+        interactiveRetrievalQueryFile = Play.application().getFile(INTERACTIVE_RETRIEVAL_PATH);
+        experimentalRetrievalQueryFile = Play.application().getFile(EXPERIMENTAL_RETRIEVAL_PATH);
     }
 
     public boolean indexFileExists() {
@@ -61,14 +65,14 @@ public class ApplicationLogic {
 
     public InteractiveRetrievalStub getInteractiveRetrievalObjectFromJson() {
         InteractiveRetrievalStub interactiveRetrievalStub = new InteractiveRetrievalStub();
-        if(interactiveEetrievalQueryFile.exists() && !interactiveEetrievalQueryFile.isDirectory()) {
+        if(interactiveRetrievalQueryFile.exists() && !interactiveRetrievalQueryFile.isDirectory()) {
             ObjectMapper mapper = new ObjectMapper();
 
             BufferedReader fileReader = null;
 
             try {
                 fileReader = new BufferedReader(
-                        new FileReader(RETRIEVAL_QUERY_PATH));
+                        new FileReader(INTERACTIVE_RETRIEVAL_PATH));
                 JsonNode json = mapper.readTree(fileReader);
                 interactiveRetrievalStub = Json.fromJson(json, InteractiveRetrievalStub.class);
             } catch (FileNotFoundException e) {
@@ -85,6 +89,34 @@ public class ApplicationLogic {
             interactiveRetrievalStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
         }
         return interactiveRetrievalStub;
+    }
+
+    public ExperimentalRetrievalStub getExperimentalRetrievalObjectFromJson() {
+        ExperimentalRetrievalStub experimentalRetrievalStub = new ExperimentalRetrievalStub();
+        if(experimentalRetrievalQueryFile.exists() && !experimentalRetrievalQueryFile.isDirectory()) {
+            ObjectMapper mapper = new ObjectMapper();
+
+            BufferedReader fileReader = null;
+
+            try {
+                fileReader = new BufferedReader(
+                        new FileReader(EXPERIMENTAL_RETRIEVAL_PATH));
+                JsonNode json = mapper.readTree(fileReader);
+                experimentalRetrievalStub = Json.fromJson(json, ExperimentalRetrievalStub.class);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
+        StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
+        if (stopwordsStub != null) {
+            experimentalRetrievalStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
+        }
+        return experimentalRetrievalStub;
     }
 
     public IndexingDocumentStub getIndexingDocumentObjectFromJson() {
@@ -181,5 +213,6 @@ public class ApplicationLogic {
         new ObjectMapper().writeValue(new File(INDEXING_SETTING_PATH), indexingDocumentStub);
     }
 
-   
+
+
 }
