@@ -10,8 +10,8 @@ import java.util.Scanner;
 public class StringTermStream implements TermStream {
     private final Scanner scanner;
 
-    public StringTermStream(String source) {
-        scanner = new Scanner(source);
+    public StringTermStream(String source, String delimiterPattern) {
+        scanner = new Scanner(source).useDelimiter(delimiterPattern);
     }
 
     @Override

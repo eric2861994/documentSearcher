@@ -77,7 +77,7 @@ public class Loader {
                 line = bufferedReader.readLine();
             }
 
-            if (id!=-1) {
+            if (id != -1) {
                 rawDocuments.add(new RawDocument(id,
                         title.toString(),
                         author.toString(),

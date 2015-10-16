@@ -3,7 +3,6 @@ package controllers;
 import formstubs.ExperimentalRetrievalStub;
 import formstubs.IndexingDocumentStub;
 import play.Play;
-import scala.collection.JavaConverters;
 import play.data.Form;
 import play.mvc.Controller;
 import play.mvc.Result;
@@ -50,6 +49,7 @@ public class Application extends Controller {
         try {
             appLogic.indexDocuments(documentsFile, stopwordsFile, tfType, dIdf, dNormalization, dStemmer);
             flash("success", "The file has been created");
+
         } catch (IOException e) {
             flash("error", "The file cannot be created " + "(" + e.getMessage() + ")");
         }
@@ -65,6 +65,12 @@ public class Application extends Controller {
         return ok(search.render("TESTING", ret));
     }
 
+    /**
+     * TODO is this deprecated?
+     * What is the purpose of this search? why does it get query from experimental retrieval stub?
+     *
+     * @return
+     */
     public static Result search() {
         Form<ExperimentalRetrievalStub> experimentalRetrievalStubForm = Form.form(ExperimentalRetrievalStub.class);
         ExperimentalRetrievalStub experimentalRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
@@ -80,9 +86,6 @@ public class Application extends Controller {
         List<Pair<Double, Integer>> similarityDocIDList = null;
         try {
             similarityDocIDList = appLogic.searchQuery(query);
-        } catch (IndexedFileException e) {
-            flash("error", "The file has not been indexed yet ");
-        } finally {
             StringBuilder stringBuilder = new StringBuilder();
             for (int resIdx = 0; resIdx < similarityDocIDList.size(); resIdx++) {
                 Pair<Double, Integer> similarityDocID = similarityDocIDList.get(resIdx);
@@ -109,7 +112,15 @@ public class Application extends Controller {
                 stringBuilder.append(similarityDocID.first);
                 stringBuilder.append('\n');
             }
-            return ok(search.render("RESULT",similarityDocIDList));
+            return ok(search.render("RESULT", similarityDocIDList));
+
+        } catch (IndexedFileException e) {
+            flash("error", "The file has not been indexed yet ");
+            /*
+            TODO return not_ok(), this return value below should not return ok
+            because indexed file exception happened
+            */
+            return ok(search.render("RESULT", similarityDocIDList));
         }
     }
 

@@ -12,7 +12,7 @@ public class StringTermStreamTest {
 
     @Test
     public void testHasNextAndNext() throws Exception {
-        StringTermStream stringTermStream = new StringTermStream("The quick brown fox jumps over the lazy dog");
+        StringTermStream stringTermStream = new StringTermStream("The quick brown fox jumps over the lazy dog", "\\W");
         String[] expected = new String[]{"The", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
 
         for (String currentExpectation : expected) {

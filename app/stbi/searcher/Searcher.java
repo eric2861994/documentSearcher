@@ -33,7 +33,7 @@ public class Searcher {
      */
     public List<Pair<Double, Integer>> search(Index index, String query, Set<Term> stopwords, Calculator.TFType tfType, boolean isUsingIdf, boolean isNormalized, boolean useStemmer) {
         // Make Term Stream from the query.
-        StringTermStream stringTermStream = new StringTermStream(query);
+        StringTermStream stringTermStream = new StringTermStream(query, "\\W");
         StopwordTermStream stopwordTermStream = new StopwordTermStream(stringTermStream, stopwords);
         TermStream termStream = stopwordTermStream;
         if (useStemmer) {
