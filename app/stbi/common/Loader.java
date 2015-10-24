@@ -1,11 +1,14 @@
 package stbi.common;
 
 import stbi.common.index.ModifiedInvertedIndex;
+import stbi.common.term.Term;
 import stbi.indexer.RawDocument;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * Files Loader.
@@ -52,14 +55,13 @@ public class Loader {
                             body.setLength(0);
                         }
 
-                        if (line.length() > 3) id = Integer.parseInt(line.substring(3)); // TODO fix this kayu
+                        if (line.length() > 3) id = Integer.parseInt(line.substring(3));
                     }
                     numOfDocument++;
 
                 } else {
                     switch (currentSection) {
                         case SECTION_TITLE:
-                            if (!title.toString().equals((""))) title.append("\n");
                             title.append(line);
                             break;
                         case SECTION_AUTHOR:
@@ -93,30 +95,33 @@ public class Loader {
 
     /**
      * Get stopwords from a file.
-     * <p/>
      * File containing Stopwords is separated by a newline and ends with a newline.
      *
      * @param stopwordsFile file containing the stopwords
      * @return stopwords
-     * @throws IOException this will rarely happen as File is checked before passed to this class
+     * @throws IOException when there is problem in reading the file
      */
-    public String[] loadStopwords(File stopwordsFile) throws IOException {
+    public Set<Term> loadStopwords(File stopwordsFile) throws IOException {
         FileReader fileReader = new FileReader(stopwordsFile);
         BufferedReader bufferedReader = new BufferedReader(fileReader);
 
-        List<String> stopwords = new ArrayList<>();
+        List<Term> stopwords = new ArrayList<>();
         try {
             // just return all the stopwords extracted from each line of the file.
             String stopword;
             while ((stopword = bufferedReader.readLine()) != null) {
-                stopwords.add(stopword);
+                Term term = new Term(stopword);
+                stopwords.add(term);
             }
 
         } finally {
             bufferedReader.close();
         }
 
-        return stopwords.toArray(new String[0]);
+        Set<Term> result = new HashSet<>();
+        result.addAll(stopwords);
+
+        return result;
     }
 
     /**

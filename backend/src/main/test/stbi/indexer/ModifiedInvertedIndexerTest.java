@@ -70,8 +70,8 @@ public class ModifiedInvertedIndexerTest {
      */
     public void createTestDocuments() throws IOException, ClassNotFoundException {
         RawDocument[] containedDocuments = new RawDocument[5];
-        containedDocuments[0] = new RawDocument(1, "the ibm dsd technical information center - a total systems approach\n" +
-                "combining traditional library features\n" +
+        containedDocuments[0] = new RawDocument(1, "the ibm dsd technical information center - a total systems approach" +
+                "combining traditional library features" +
                 "and mechanized computer processing", "H. S. WHITE", "the ibm data systems division technical\n" +
                 " information center (tic) provides an operating developmental\n" +
                 "system for integrated and compatible mechanized\n" +
@@ -96,7 +96,7 @@ public class ModifiedInvertedIndexerTest {
                 "\n" +
                 "  since the system has been operating for over a year, the\n" +
                 "conclusions drawn are based on actual experience .");
-        containedDocuments[1] = new RawDocument(42, "new photon composing machine will set type from the output of\n" +
+        containedDocuments[1] = new RawDocument(42, "new photon composing machine will set type from the output of" +
                 "a computer .", "R. G. CROCKETT\n" +
                 "W. W. YOUDEN", "/zip/ is a printout device that will produce\n" +
                 "justified text of typographical quality on film or paper\n" +
@@ -109,7 +109,7 @@ public class ModifiedInvertedIndexerTest {
                 "the use of this miniaturization of pages of information on transparent\n" +
                 "film sheets should increase available information while\n" +
                 "decreasing document switching time and costs .");
-        containedDocuments[3] = new RawDocument(80, "design of an experiment for evaluation of the citation index\n" +
+        containedDocuments[3] = new RawDocument(80, "design of an experiment for evaluation of the citation index" +
                 "as a reference aid .", "B. LIPETZ", "objective evaluation of a documentation\n" +
                 " technique may be accomplished by introducing it in a limited\n" +
                 "test area and studying information user behavior in\n" +

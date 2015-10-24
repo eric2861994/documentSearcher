@@ -8,9 +8,6 @@
     @helper.form(action = routes.Application.postIndexingDocument(), 'id -> "myForm") {
             <div class="row form-horizontal">
                 @helper.inputText(indexingDocumentForm("documentLocation"), '_label -> "Document Location")
-                @helper.inputText(indexingDocumentForm("stopwordLocation"), '_label -> "StopWord Location", 'readonly -> "readonly")
-                @helper.inputRadioGroup(indexingDocumentForm("useStopwords"),
-                    options = views.html.helper.options("false"->"No","true"->"Yes"))
             </div>
             <div class="row">
                 <div class="col-xs-12">
@@ -36,7 +33,7 @@
                 </div>
 
             </div>
-        <input type='submit' name='mysubmit' value='Enter' class="btn btn-default" />
+        <input type='submit' name='mysubmit' value='Create Index' class="btn btn-default" />
     }
 } {
 

@@ -1,6 +1,7 @@
 package stbi.relevance;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,14 +12,13 @@ import java.util.Map;
 public class RelevanceJudge {
 
     public static class Query {
-
-        public Query(int id, String queryString) {
-            id = id;
-            queryString = queryString;
+        public Query(int a_id, String a_queryString) {
+            id = a_id;
+            queryString = a_queryString;
         }
 
-        int id;
-        String queryString;
+        public int id;
+        public String queryString;
     }
 
     public static class Evaluation {
@@ -35,7 +35,7 @@ public class RelevanceJudge {
     private List<Query> queryList;
     private Map<Integer, List<Integer>> queryRelation;
 
-    public RelevanceJudge(String queryFile, String queryRelationFile) throws IOException {
+    public RelevanceJudge(File queryFile, File queryRelationFile) throws IOException {
         queryList = new ArrayList<>();
         queryRelation = new HashMap<>();
 
@@ -43,7 +43,7 @@ public class RelevanceJudge {
         loadQueryRelationFromFile(queryRelationFile);
     }
 
-    private void loadQueryFromFile(String queryFile) throws IOException {
+    private void loadQueryFromFile(File queryFile) throws IOException {
 
         FileReader fileReader = null;
         BufferedReader bufferedReader = null;
@@ -93,7 +93,7 @@ public class RelevanceJudge {
         }
     }
 
-    private void loadQueryRelationFromFile(String queryRelationFile) throws IOException {
+    private void loadQueryRelationFromFile(File queryRelationFile) throws IOException {
         FileReader fileReader = null;
         BufferedReader bufferedReader = null;
         try {

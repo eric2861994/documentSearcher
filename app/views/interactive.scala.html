@@ -5,16 +5,18 @@
 @implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
 
 @main(title = title) {
+
     @helper.form(action = routes.Application.search(), 'id -> "myForm") {
         <div class="row form-horizontal">
             @helper.inputText(interactiveRetrievalForm("query"), '_label -> "Query")
-            @helper.inputText(interactiveRetrievalForm("stopwordLocation"), '_label -> "Stopword Location",'readonly -> "readonly")
-            @helper.inputRadioGroup(interactiveRetrievalForm("useStopwords"),
-                options = views.html.helper.options("false"->"No","true"->"Yes"))
         </div>
+        <input type='submit' value='Search' class="btn btn-default" />
+    }
+
+    @helper.form(action = routes.Application.postInteractive(), 'id -> "myForm") {
         <div class="row">
             <div class="col-xs-12">
-                <label class="control-label" for="query">Query</label>
+                <label class="control-label" for="query">Search Settings</label>
                 <div class="form-horizontal">
                     <div class="form-group">
                     @helper.inputRadioGroup(interactiveRetrievalForm("tf"),
@@ -36,7 +38,7 @@
             </div>
 
         </div>
-        <input type='submit' name='submit' value='Enter' class="btn btn-default" />
+        <input type='submit' name='submit' value='Save Settings' class="btn btn-default" />
     }
 } {
 

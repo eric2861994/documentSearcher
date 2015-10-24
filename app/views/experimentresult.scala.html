@@ -1,0 +1,22 @@
+@import stbi.ExperimentResult
+@(title: String = "Result")(list: java.util.List[ExperimentResult])
+
+@main(title = title) {
+    <ol>
+    @for((p, idx) <- list.zipWithIndex) {
+        <li><a href="/experiment/result/@idx">@p.getQuery</a></li>
+    }
+    </ol>
+} {
+    @*todo implement this*@
+    @*<script type="text/javascript">*@
+    @*$(document).ready(function() {*@
+    @*$('#example').DataTable({*@
+    @*"paging": true,*@
+    @*"ordering": true,*@
+    @*"info": true,*@
+    @*"order": [[ 0, "desc" ]]*@
+    @*});*@
+    @*} );*@
+    @*</script>*@
+}

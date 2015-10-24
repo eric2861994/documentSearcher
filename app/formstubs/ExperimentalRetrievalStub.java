@@ -1,37 +1,26 @@
 package formstubs;
 
-/**
- * Created by nim_13512065 on 10/16/15.
- */
 public class ExperimentalRetrievalStub extends RetrievalStub {
-    protected String query;
-    private boolean useStopwords;
+    private String queryLocation;
     private String relevantJudgementLocation;
 
     public ExperimentalRetrievalStub() {
-        super();
+        queryLocation = "";
+        relevantJudgementLocation = "";
     }
 
     public ExperimentalRetrievalStub(ExperimentalRetrievalStub experimentalRetrievalStub) {
         super(experimentalRetrievalStub);
-        setQuery(experimentalRetrievalStub.getQuery());
+        setQueryLocation(experimentalRetrievalStub.getQueryLocation());
         setRelevantJudgementLocation(experimentalRetrievalStub.getRelevantJudgementLocation());
     }
 
-    public String getQuery() {
-        return query;
+    public String getQueryLocation() {
+        return queryLocation;
     }
 
-    public void setQuery(String query) {
-        this.query = query;
-    }
-
-    public boolean isUseStopwords() {
-        return useStopwords;
-    }
-
-    public void setUseStopwords(boolean useStopwords) {
-        this.useStopwords = useStopwords;
+    public void setQueryLocation(String query) {
+        queryLocation = query;
     }
 
     public String getRelevantJudgementLocation() {

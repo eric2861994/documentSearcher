@@ -1,8 +1,5 @@
 package formstubs;
 
-/**
- * Created by nim_13512065 on 10/15/15.
- */
 public class InteractiveRetrievalStub extends RetrievalStub {
     protected String query;
     private boolean useStopwords;

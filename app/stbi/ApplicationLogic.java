@@ -19,9 +19,11 @@ import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
 import stbi.indexer.ModifiedInvertedIndexer;
 import stbi.indexer.RawDocument;
+import stbi.relevance.RelevanceJudge;
 import stbi.searcher.Searcher;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -32,130 +34,122 @@ import java.util.Set;
  */
 public class ApplicationLogic {
 
-    public static final String INDEXING_SETTING_PATH = "res/indexing.json";
-    private static final String STOPWORD_PATH = "res/stopwords.json";
+    // TODO make this local variable?
+    private static final String INDEXING_SETTING_PATH = "res/indexing.json";
+    private static final String STOPWORD_SETTING_PATH = "res/stopwords.json";
     private static final String INTERACTIVE_RETRIEVAL_PATH = "res/interactive.json";
     private static final String EXPERIMENTAL_RETRIEVAL_PATH = "res/experimental.json";
+    private static final Set<Term> emptyStopword = new HashSet<>();
 
+
+    private static final String INDEX_FILE_PATH = "res/index.idx";
     private final Loader loader = new Loader();
     private final Calculator calculator = new Calculator();
     private final ModifiedInvertedIndexer modifiedInvertedIndexer = new ModifiedInvertedIndexer(calculator);
     private final Searcher searcher = new Searcher(calculator);
     private final File indexFile;
     private final File indexSettingFile;
-    private final File stopwordFile;
-    private final File interactiveRetrievalQueryFile;
+    private final File stopwordSettingFile;
+    private final File interactiveSearchSettings;
     private final File experimentalRetrievalQueryFile;
 
     private Index index;
     private Set<Term> stopwords;
-    private Option searchOption;
+    private List<ExperimentResult> experimentResult;
 
     private ApplicationLogic() {
-        indexFile = Play.application().getFile("res/index.idx");
+        indexFile = Play.application().getFile(INDEX_FILE_PATH);
         indexSettingFile = Play.application().getFile(INDEXING_SETTING_PATH);
-        stopwordFile = Play.application().getFile(STOPWORD_PATH);
-        interactiveRetrievalQueryFile = Play.application().getFile(INTERACTIVE_RETRIEVAL_PATH);
+        stopwordSettingFile = Play.application().getFile(STOPWORD_SETTING_PATH);
+        interactiveSearchSettings = Play.application().getFile(INTERACTIVE_RETRIEVAL_PATH);
         experimentalRetrievalQueryFile = Play.application().getFile(EXPERIMENTAL_RETRIEVAL_PATH);
-    }
 
-    public boolean indexFileExists() {
-        return indexFile.exists() && !indexFile.isDirectory();
-    }
-
-    public InteractiveRetrievalStub getInteractiveRetrievalObjectFromJson() {
-        InteractiveRetrievalStub interactiveRetrievalStub = new InteractiveRetrievalStub();
-        if(interactiveRetrievalQueryFile.exists() && !interactiveRetrievalQueryFile.isDirectory()) {
-            ObjectMapper mapper = new ObjectMapper();
-
-            BufferedReader fileReader = null;
-
+        // try to load stopwords
+        StopwordsStub stopwordsSetting = loadStopwordSetting();
+        if (stopwordsSetting != null) {
+            File stopwordFile = new File(stopwordsSetting.getStopwordLocation());
             try {
-                fileReader = new BufferedReader(
-                        new FileReader(INTERACTIVE_RETRIEVAL_PATH));
-                JsonNode json = mapper.readTree(fileReader);
-                interactiveRetrievalStub = Json.fromJson(json, InteractiveRetrievalStub.class);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
+                stopwords = loader.loadStopwords(stopwordFile);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
 
+        if (stopwords == null) {
+            stopwords = emptyStopword;
         }
-        StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
-        if (stopwordsStub != null) {
-            interactiveRetrievalStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
+
+        // try to load index
+        try {
+            index = loader.loadIndex(indexFile);
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
-        return interactiveRetrievalStub;
     }
 
-    public ExperimentalRetrievalStub getExperimentalRetrievalObjectFromJson() {
+    public ExperimentalRetrievalStub getExperimentSettings() {
         ExperimentalRetrievalStub experimentalRetrievalStub = new ExperimentalRetrievalStub();
-        if(experimentalRetrievalQueryFile.exists() && !experimentalRetrievalQueryFile.isDirectory()) {
-            ObjectMapper mapper = new ObjectMapper();
+        Option option = getExperimentOption();
+        experimentalRetrievalStub.setTf(option.getTfType());
+        experimentalRetrievalStub.setUseIdf(option.isUseIDF());
+        experimentalRetrievalStub.setUseNormalization(option.isUseNormalization());
+        experimentalRetrievalStub.setUseStemmer(option.isUseStemmer());
 
-            BufferedReader fileReader = null;
-
-            try {
-                fileReader = new BufferedReader(
-                        new FileReader(EXPERIMENTAL_RETRIEVAL_PATH));
-                JsonNode json = mapper.readTree(fileReader);
-                experimentalRetrievalStub = Json.fromJson(json, ExperimentalRetrievalStub.class);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
-            } catch (JsonProcessingException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-        }
-        StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
-        if (stopwordsStub != null) {
-            experimentalRetrievalStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
-        }
         return experimentalRetrievalStub;
     }
 
-    public IndexingDocumentStub getIndexingDocumentObjectFromJson() {
-        IndexingDocumentStub indexingDocumentStub = null;
-        if(indexSettingFile.exists() && !indexSettingFile.isDirectory()) {
-            ObjectMapper mapper = new ObjectMapper();
 
-            BufferedReader fileReader = null;
+    public void indexDocuments(File documentsFile, Calculator.TFType tfType, boolean useIDF,
+                               boolean useNormalization, boolean useStemmer) throws IOException {
+        // stopwords is guaranteed to be not null
+        List<RawDocument> documents = loader.loadAllDocuments(documentsFile);
+        index = modifiedInvertedIndexer.createIndex(documents, stopwords, tfType, useIDF, useNormalization, useStemmer);
+
+        loader.saveIndex(indexFile, (ModifiedInvertedIndex) index);
+    }
+
+    public boolean indexLoaded() {
+        return index != null;
+    }
+
+    public IndexingDocumentStub loadIndexingSettings() {
+        IndexingDocumentStub indexingDocumentStub = new IndexingDocumentStub();
+        if (indexSettingFile.exists() && !indexSettingFile.isDirectory()) {
             try {
-                fileReader = new BufferedReader(
-                        new FileReader(INDEXING_SETTING_PATH));
-                JsonNode json = mapper.readTree(fileReader);
-                indexingDocumentStub = Json.fromJson(json, IndexingDocumentStub.class);
-            } catch (FileNotFoundException e) {
-                e.printStackTrace();
+                BufferedReader fileReader = new BufferedReader(new FileReader(indexSettingFile));
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jsonNode = mapper.readTree(fileReader);
+                indexingDocumentStub = Json.fromJson(jsonNode, IndexingDocumentStub.class);
+
             } catch (JsonProcessingException e) {
+                e.printStackTrace();
+            } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        StopwordsStub stopwordsStub = getStopwordsDocumentObjectFromJson();
+
+        StopwordsStub stopwordsStub = loadStopwordSetting();
         if (stopwordsStub != null) {
             indexingDocumentStub.setStopwordLocation(stopwordsStub.getStopwordLocation());
         }
+
         return indexingDocumentStub;
     }
 
-    public StopwordsStub getStopwordsDocumentObjectFromJson() {
+    public final StopwordsStub loadStopwordSetting() {
         StopwordsStub stopwordsStub = null;
-        if(stopwordFile.exists() && !stopwordFile.isDirectory()) {
-            ObjectMapper mapper = new ObjectMapper();
-
-            BufferedReader fileReader = null;
+        if (stopwordSettingFile.exists() && !stopwordSettingFile.isDirectory()) {
             try {
-                fileReader = new BufferedReader(
-                        new FileReader(STOPWORD_PATH));
+                BufferedReader fileReader = new BufferedReader(new FileReader(stopwordSettingFile));
+                ObjectMapper mapper = new ObjectMapper();
                 JsonNode json = mapper.readTree(fileReader);
                 stopwordsStub = Json.fromJson(json, StopwordsStub.class);
+
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (JsonProcessingException e) {
@@ -166,37 +160,132 @@ public class ApplicationLogic {
         }
         return stopwordsStub;
     }
-    
-    public void setSearchOptions(Option _searchOption) {
-        searchOption = _searchOption;
+
+    // TODO delete InteractiveRetrievalStub, use option instead
+    public InteractiveRetrievalStub loadInteractiveSearchSettings() {
+        InteractiveRetrievalStub interactiveRetrievalStub = new InteractiveRetrievalStub();
+        Option option = getSearchOption();
+        interactiveRetrievalStub.setTf(option.getTfType());
+        interactiveRetrievalStub.setUseIdf(option.isUseIDF());
+        interactiveRetrievalStub.setUseNormalization(option.isUseNormalization());
+        interactiveRetrievalStub.setUseStemmer(option.isUseStemmer());
+
+        return interactiveRetrievalStub;
     }
 
-    public void indexDocuments(File documentsFile, File stopwordsFile, Calculator.TFType tfType, boolean useIDF,
-                               boolean useNormalization, boolean useStemmer) throws IOException {
-        List<RawDocument> documents = loader.loadAllDocuments(documentsFile);
+    public void setSearchOption(Option searchOption) throws IOException {
+        new ObjectMapper().writeValue(interactiveSearchSettings, searchOption);
+    }
 
-        // load stopwords
-        String[] stopwordsArray = loader.loadStopwords(stopwordsFile);
-        Set<Term> stopwordsSet = new HashSet<>();
-        for (String stopwordString : stopwordsArray) {
-            Term stopword = new Term(stopwordString);
-            stopwordsSet.add(stopword);
+    public Option getSearchOption() {
+        Option option = new Option();
+        if (interactiveSearchSettings.exists() && !interactiveSearchSettings.isDirectory()) {
+            try {
+                BufferedReader fileReader = new BufferedReader(new FileReader(interactiveSearchSettings));
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jsonNode = mapper.readTree(fileReader);
+                option = Json.fromJson(jsonNode, Option.class);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        stopwords = stopwordsSet;
 
-        index = modifiedInvertedIndexer.createIndex(documents, stopwordsSet, tfType, useIDF,
-                useNormalization, useStemmer);
-        loader.saveIndex(indexFile, (ModifiedInvertedIndex) index);
+        return option;
     }
 
-    public List<Pair<Double, Integer>> searchQuery(String query) throws IndexedFileException {
-        if (stopwords == null && index == null) throw new IndexedFileException(); // TODO ini maksudnya or bukan?
-        return searcher.search(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
-                searchOption.isUseNormalization(), searchOption.isUseStemmer());
+    public void setExperimentOption(Option experimentOption) throws IOException {
+        new ObjectMapper().writeValue(experimentalRetrievalQueryFile, experimentOption);
+    }
+
+    public Option getExperimentOption() {
+        Option option = new Option();
+        if (experimentalRetrievalQueryFile.exists() && !experimentalRetrievalQueryFile.isDirectory()) {
+            try {
+                BufferedReader fileReader = new BufferedReader(new FileReader(experimentalRetrievalQueryFile));
+                ObjectMapper mapper = new ObjectMapper();
+                JsonNode jsonNode = mapper.readTree(fileReader);
+                option = Json.fromJson(jsonNode, Option.class);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return option;
     }
 
     public IndexedDocument getIndexedDocument(int docID) {
         return index.getIndexedDocument(docID);
+    }
+
+    public List<Pair<Double, Integer>> searchQuery(String query) throws IndexedFileException {
+        if (stopwords == null || index == null) {
+            throw new IndexedFileException();
+        }
+
+        Option searchOption = getSearchOption();
+        return searcher.search(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
+                searchOption.isUseNormalization(), searchOption.isUseStemmer());
+    }
+
+    public void saveIndexingSettings(IndexingDocumentStub indexingDocumentStub) throws IOException {
+        new ObjectMapper().writeValue(indexSettingFile, indexingDocumentStub);
+    }
+
+    public void saveStopwordsSetting(StopwordsStub stopwordsStub) throws IOException {
+        File stopwordFile = new File(stopwordsStub.getStopwordLocation());
+        stopwords = loader.loadStopwords(stopwordFile);
+        new ObjectMapper().writeValue(stopwordSettingFile, stopwordsStub);
+    }
+
+    public void performExperiment(String queryPath, String relevanceJudgementPath) throws IOException {
+        RelevanceJudge relevanceJudge = new RelevanceJudge(
+                Play.application().getFile(queryPath),
+                Play.application().getFile(relevanceJudgementPath)
+        );
+
+        // get experiment queries
+        List<RelevanceJudge.Query> testQueries = relevanceJudge.getQueryList();
+
+        List<ExperimentResult> experimentResultList = new ArrayList<>();
+        for (RelevanceJudge.Query query : testQueries) {
+            // perform search on query
+            Option option = getExperimentOption();
+            List<Pair<Double, Integer>> documentSimilarityList = searcher.search(index, query.queryString, stopwords,
+                    option.getTfType(), option.isUseIDF(), option.isUseNormalization(), option.isUseStemmer());
+
+            // get all document id of search result, as it is needed in relevanceJudge.evaluate
+            List<Integer> relevantDocuments = new ArrayList<>();
+            List<SearchResultEntry> searchResult = new ArrayList<>();
+            for (int i = 0; i < documentSimilarityList.size(); i++) {
+                Pair<Double, Integer> documentSimilarity = documentSimilarityList.get(i);
+
+                relevantDocuments.add(documentSimilarity.second);
+                searchResult.add(new SearchResultEntry(
+                        i + 1,
+                        documentSimilarity.first,
+                        index.getIndexedDocument(documentSimilarity.second)
+                ));
+            }
+
+            // evaluate a query
+            RelevanceJudge.Evaluation eval = relevanceJudge.evaluate(query.id, relevantDocuments);
+
+            ExperimentResult experResult = new ExperimentResult(query.queryString,
+                    (double) eval.precision, (double) eval.recall, searchResult);
+            experimentResultList.add(experResult);
+        }
+
+        experimentResult = experimentResultList;
+    }
+
+    public List<ExperimentResult> getExperimentResults() {
+        return experimentResult;
+    }
+
+    public ExperimentResult getExperimentResult(int idx) {
+        return experimentResult.get(idx);
     }
 
     private static final ApplicationLogic oneInstance = new ApplicationLogic();
@@ -204,15 +293,4 @@ public class ApplicationLogic {
     public static ApplicationLogic getInstance() {
         return oneInstance;
     }
-
-    public void saveStopwordsLocation(StopwordsStub stopwordsStub) throws IOException {
-        new ObjectMapper().writeValue(new File(STOPWORD_PATH), stopwordsStub);
-    }
-
-    public void saveIndexingDocumentSetting(IndexingDocumentStub indexingDocumentStub) throws IOException {
-        new ObjectMapper().writeValue(new File(INDEXING_SETTING_PATH), indexingDocumentStub);
-    }
-
-
-
 }

@@ -3,28 +3,31 @@
 # ~~~~
 
 # Home page
-GET     /                           controllers.Application.index
+GET         /                             controllers.Application.index
 
-GET     /search              controllers.Application.search
+# indexing page
+GET         /indexing                     controllers.Application.indexingDocument
+POST        /indexing                     controllers.Application.postIndexingDocument
 
-GET     /experimental               controllers.Application.experimental
-GET     /experimental               controllers.Application.searchexperimental
+# stopwords settings page
+GET         /stopwords                    controllers.Application.stopwords
+POST        /stopwords                    controllers.Application.postStopwords
 
-GET     /interactive                controllers.Application.interactive
+# interactive search page
+GET         /interactive                  controllers.Application.interactive
+POST        /interactive                  controllers.Application.postInteractive
 
-GET     /indexing                   controllers.Application.indexingDocument
-POST     /indexing                  controllers.Application.postIndexingDocument
-#
-#GET     /load/stopwords             controllers.Application.loadStopwords
-#GET     /load/documents             controllers.Application.loadDocuments
+# interactive search result page
+GET         /search                       controllers.Application.search
 
-GET       /stopwords                controllers.Application.stopwords
-POST       /stopwords               controllers.Application.postStopwords
+# experiment page
+GET         /experimental                 controllers.Application.experimental
+POST        /experimental                 controllers.Application.postExperimental
+
+# experiment result page
+POST        /experiment                   controllers.Application.performExperiment
+GET         /experiment/result            controllers.Application.experimentResult
+GET         /experiment/result/*id        controllers.Application.experimentDetail(id)
 
 # Map static resources from the /public folder to the /assets URL path
-GET     /assets/*file               controllers.Assets.at(path="/public", file)
-
-
-#testing
-GET     /testresultinteractive      controllers.Application.testResultInteractive
-GET     /testresultexperimental      controllers.Application.testResultExperimental
+GET         /assets/*file                 controllers.Assets.at(path="/public", file)

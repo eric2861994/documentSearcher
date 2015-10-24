@@ -1,0 +1,43 @@
+@import stbi.ExperimentResult
+@(title: String = "Result")(result: ExperimentResult)
+
+@main(title = title) {
+    Query: @result.getQuery() <br/>
+    Precision: @result.getPrecision <br/>
+    Recall: @result.getRecall <br/>
+    Non Interpolated Average Precision: @result.getNoninterpolatedAveragePrecision <br/>
+    <table class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Number</th>
+                <th>Similarity</th>
+                <th>Document ID</th>
+                <th>Document Title</th>
+            </tr>
+        </thead>
+
+        <tbody>
+        @for(detail <- result.getExperimentalDetailResultList) {
+            <tr>
+                <td>@detail.getRank</td>
+                <td>@detail.getSimilarity</td>
+                <td>@detail.getDocumentId</td>
+                <td>@detail.getDocumentTitle</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <br/>
+} {
+    @*todo implement this*@
+    @*<script type="text/javascript">*@
+    @*$(document).ready(function() {*@
+    @*$('#example').DataTable({*@
+    @*"paging": true,*@
+    @*"ordering": true,*@
+    @*"info": true,*@
+    @*"order": [[ 0, "desc" ]]*@
+    @*});*@
+    @*} );*@
+    @*</script>*@
+}

@@ -11,6 +11,10 @@ public class Option {
     private boolean useNormalization;
     private boolean useStemmer;
 
+    public Option() {
+        this(Calculator.TFType.RAW_TF, false, false, false);
+    }
+
     public Option(Calculator.TFType _tfType, boolean _useIDF, boolean _useNormalization, boolean _useStemmer) {
         setTfType(_tfType);
         setUseIDF(_useIDF);

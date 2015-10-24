@@ -1,12 +1,9 @@
 package formstubs;
 
-/**
- * Created by nim_13512065 on 10/16/15.
- */
 public class StopwordsStub {
-    protected String stopwordLocation;
-    public StopwordsStub() {
+    private String stopwordLocation;
 
+    public StopwordsStub() {
     }
 
     public StopwordsStub(StopwordsStub stopwordsStub) {

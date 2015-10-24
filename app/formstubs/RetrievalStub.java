@@ -2,21 +2,19 @@ package formstubs;
 
 import stbi.common.util.Calculator;
 
-/**
- * Created by nim_13512065 on 10/15/15.
- */
 public class RetrievalStub extends StopwordsStub {
     protected boolean useIdf;
     protected Calculator.TFType tf;
     protected boolean useNormalization;
     protected boolean useStemmer;
+    protected boolean useStopwords;
 
     public RetrievalStub() {
         super();
         setTf(Calculator.TFType.RAW_TF);
     }
 
-    public RetrievalStub(RetrievalStub retrievalStub){
+    public RetrievalStub(RetrievalStub retrievalStub) {
         super(retrievalStub);
         setUseIdf(retrievalStub.isUseIdf());
         setTf(retrievalStub.getTf());

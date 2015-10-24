@@ -52,7 +52,7 @@ public class Loader {
                             body.setLength(0);
                         }
 
-                        if (line.length() > 3) id = Integer.parseInt(line.substring(3)); // TODO fix this kayu
+                        if (line.length() > 3) id = Integer.parseInt(line.substring(3));
                     }
                     numOfDocument++;
 

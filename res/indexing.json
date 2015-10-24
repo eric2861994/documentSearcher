@@ -1,8 +1,1 @@
-{
-  "documentLocation" : "a",
-  "useIdf": true,
-  "tf" : "RAW_TF",
-  "useNormalization" : true,
-  "useStopwords" : true,
-  "useStemmer": false
-}
+{"stopwordLocation":"res/stopwords.txt","documentLocation":"dataset/CISI/cisi.all","tf":"RAW_TF","useIdf":false,"useNormalization":false,"useStemmer":false,"useStopwords":true}

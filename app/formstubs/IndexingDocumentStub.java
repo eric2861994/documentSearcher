@@ -1,32 +1,28 @@
 package formstubs;
 
-import play.data.validation.Constraints;
 import stbi.common.util.Calculator;
 
-/**
- * Created by nim_13512065 on 10/15/15.
- */
 public class IndexingDocumentStub extends StopwordsStub {
     private String documentLocation;
 
-    private boolean useIdf;
-    @Constraints.Required
     private Calculator.TFType tf;
+    private boolean useIdf;
     private boolean useNormalization;
     private boolean useStemmer;
-
     private boolean useStopwords;
 
     //DONT REMOVE THIS CONSTRUCTOR
     public IndexingDocumentStub() {
-        super();
+        setDocumentLocation("");
+        setTf(Calculator.TFType.RAW_TF);
     }
 
-    public IndexingDocumentStub(String documentLocation, String stopwordLocation, Calculator.TFType tfType, boolean dIdf, boolean dNormalization, boolean dStemmer) {
+    public IndexingDocumentStub(String documentLocation, String stopwordLocation, Calculator.TFType tfType,
+                                boolean dIdf, boolean dNormalization, boolean dStemmer) {
         setDocumentLocation(documentLocation);
         setStopwordLocation(stopwordLocation);
-        setUseIdf(dIdf);
         setTf(tfType);
+        setUseIdf(dIdf);
         setUseNormalization(dNormalization);
         setUseStemmer(dStemmer);
     }
