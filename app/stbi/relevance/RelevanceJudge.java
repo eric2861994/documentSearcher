@@ -103,14 +103,15 @@ public class RelevanceJudge {
             String line = bufferedReader.readLine();
             while (line != null) {
 
-                String[] token = line.split(" ");
+                String[] token = line.split("\\s+");
 
                 int queryId = Integer.parseInt(token[0]);
                 int documentId = Integer.parseInt(token[1]);
 
-                List<Integer> documentList = queryRelation.get(queryId);
-                if (documentList == null) documentList = new ArrayList<Integer>();
-                documentList.add(documentId);
+                if (!queryRelation.containsKey(queryId)) {
+                    queryRelation.put(queryId, new ArrayList<Integer>());
+                }
+                queryRelation.get(queryId).add(documentId);
 
                 line = bufferedReader.readLine();
             }
@@ -128,9 +129,9 @@ public class RelevanceJudge {
 
     public Evaluation evaluate(int queryId, List<Integer> documentIdList) {
         Evaluation evaluation = new Evaluation();
+        evaluation.nonInterpolatedPrecision = computeNonInterpolatedPrecision(queryId, documentIdList);
         evaluation.precision = computePrecision(queryId, documentIdList);
         evaluation.recall = computeRecall(queryId, documentIdList);
-        evaluation.nonInterpolatedPrecision = computeNonInterpolatedPrecision(queryId, documentIdList);
         evaluation.interpolatedPrecision = computeInterpolatedPrecision(queryId, documentIdList);
         return evaluation;
     }
@@ -158,7 +159,7 @@ public class RelevanceJudge {
     }
 
     public float computePrecision(int queryId, List<Integer> documentIdList) {
-        if (queryRelation.get(queryId) == null) return 0;
+        if (queryRelation.get(queryId) == null || documentIdList.size() == 0) return 0;
         else {
             int nOfRelevantDocumentInQuery = 0;
             for (int i = 0; i < documentIdList.size(); i++) {
@@ -176,10 +177,11 @@ public class RelevanceJudge {
             for (int i = 0; i < documentIdList.size(); i++) {
                 if (isDocumentRelevant(queryId, documentIdList.get(i))) {
                     nOfRelevantDocumentInQuery++;
-                    float precision = (float) nOfRelevantDocumentInQuery / i;
+                    float precision = (float) nOfRelevantDocumentInQuery / (i + 1);
                     precisionAccum += precision;
                 }
             }
+            System.out.println(precisionAccum);
             return precisionAccum / queryRelation.get(queryId).size();
         }
     }
@@ -196,7 +198,7 @@ public class RelevanceJudge {
             for (int i = 0; i < documentIdList.size(); i++) {
                 if (isDocumentRelevant(queryId, documentIdList.get(i))) {
                     nOfRelevantDocumentInQuery++;
-                    float precision = (float) nOfRelevantDocumentInQuery / i;
+                    float precision = (float) nOfRelevantDocumentInQuery / (i + 1);
                     float recall = (float) nOfRelevantDocumentInQuery / nOfRelevantDocument;
 
                     int stepCount = ((int) Math.floor(recall * 10) - prevStep);

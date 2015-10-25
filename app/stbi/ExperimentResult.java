@@ -13,7 +13,8 @@ public class ExperimentResult {
     public ExperimentResult() {
     }
 
-    public ExperimentResult(String query, Double precision, Double recall, List<SearchResultEntry> experimentalDetailResultList) {
+    public ExperimentResult(String query, double precision, double recall, double niap, List<SearchResultEntry> experimentalDetailResultList) {
+        noninterpolatedAveragePrecision = niap;
         setPrecision(precision);
         setRecall(recall);
         setQuery(query);

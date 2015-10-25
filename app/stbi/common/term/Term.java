@@ -9,7 +9,7 @@ public class Term implements Serializable {
     private String text;
 
     public Term(String _text) {
-        text = _text;
+        text = _text.toLowerCase();
     }
 
     public String getText() {
