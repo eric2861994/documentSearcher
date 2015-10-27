@@ -26,7 +26,8 @@ public class ModifiedInvertedIndexer {
         calculator = _calculator;
     }
 
-    public ModifiedInvertedIndex createIndex(List<RawDocument> rawDocumentsList, Set<Term> stopwords, Calculator.TFType tfType, boolean useIDF, boolean useNormalization, boolean useStemmer) throws IOException {
+    public ModifiedInvertedIndex createIndex(List<RawDocument> rawDocumentsList, Set<Term> stopwords, Calculator.TFType tfType,
+                                             boolean useIDF, boolean useNormalization, boolean useStemmer) throws IOException {
         // load all documents
         RawDocument[] documents = rawDocumentsList.toArray(new RawDocument[rawDocumentsList.size()]);
 

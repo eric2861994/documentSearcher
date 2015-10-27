@@ -25,7 +25,7 @@ public class ModifiedInvertedIndex implements Index, Serializable {
     @Override
     public Integer[] getDocumentIDs(Term[] terms) {
         Set<Integer> idSet = new HashSet<>();
-        for (Term term : termDocumentWeight.keySet()) {
+        for (Term term : terms) {
             if (termDocumentWeight.containsKey(term)) {
                 for (Integer docID : termDocumentWeight.get(term).keySet()) {
                     idSet.add(docID);

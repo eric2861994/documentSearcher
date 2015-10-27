@@ -34,7 +34,6 @@ import java.util.Set;
  */
 public class ApplicationLogic {
 
-    // TODO make this local variable?
     private static final String INDEXING_SETTING_PATH = "res/indexing.json";
     private static final String STOPWORD_SETTING_PATH = "res/stopwords.json";
     private static final String INTERACTIVE_RETRIEVAL_PATH = "res/interactive.json";
@@ -83,9 +82,7 @@ public class ApplicationLogic {
         try {
             index = loader.loadIndex(indexFile);
 
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
@@ -161,7 +158,6 @@ public class ApplicationLogic {
         return stopwordsStub;
     }
 
-    // TODO delete InteractiveRetrievalStub, use option instead
     public InteractiveRetrievalStub loadInteractiveSearchSettings() {
         InteractiveRetrievalStub interactiveRetrievalStub = new InteractiveRetrievalStub();
         Option option = getSearchOption();
@@ -245,6 +241,14 @@ public class ApplicationLogic {
                 Play.application().getFile(relevanceJudgementPath)
         );
 
+        File file = new File("output.txt");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        FileWriter writer = new FileWriter(file);
+        writer.write("");
+
         // get experiment queries
         List<RelevanceJudge.Query> testQueries = relevanceJudge.getQueryList();
 
@@ -273,9 +277,14 @@ public class ApplicationLogic {
             RelevanceJudge.Evaluation eval = relevanceJudge.evaluate(query.id, relevantDocuments);
 
             ExperimentResult experResult = new ExperimentResult(query.queryString,
-                    (double) eval.precision, (double) eval.recall, eval.nonInterpolatedPrecision, searchResult);
+                    (double) eval.precision, (double) eval.recall, (double) eval.nonInterpolatedPrecision, searchResult);
             experimentResultList.add(experResult);
+
+            String line = eval.recall + "," + eval.precision + "," + eval.nonInterpolatedPrecision + "\n";
+            writer.append(line);
         }
+
+        writer.close();
 
         experimentResult = experimentResultList;
     }

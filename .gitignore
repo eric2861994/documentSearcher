@@ -71,3 +71,4 @@ gradlew.bat
 backend/src/main/test/testConfig.properties
 res/index.idx
 dataset/ADI/test.obj
+testresult/

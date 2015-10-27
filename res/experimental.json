@@ -1,1 +1,1 @@
-{"tfType":"RAW_TF","useIDF":false,"useNormalization":false,"useStemmer":false}
+{"tfType":"AUGMENTED_TF","useIDF":true,"useNormalization":true,"useStemmer":true}

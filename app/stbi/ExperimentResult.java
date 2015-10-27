@@ -13,12 +13,13 @@ public class ExperimentResult {
     public ExperimentResult() {
     }
 
-    public ExperimentResult(String query, double precision, double recall, double niap, List<SearchResultEntry> experimentalDetailResultList) {
-        noninterpolatedAveragePrecision = niap;
+    public ExperimentResult(String query, double precision, double recall, double a_noninterpolatedAveragePrecision,
+                            List<SearchResultEntry> experimentalDetailResultList) {
+        setQuery(query);
         setPrecision(precision);
         setRecall(recall);
-        setQuery(query);
-        setExperimentalDetailResultList(new ArrayList<SearchResultEntry>(experimentalDetailResultList));
+        noninterpolatedAveragePrecision = a_noninterpolatedAveragePrecision;
+        setExperimentalDetailResultList(new ArrayList<>(experimentalDetailResultList));
     }
 
     public final double getPrecision() {

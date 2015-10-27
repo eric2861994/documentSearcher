@@ -20,18 +20,8 @@ public class Searcher {
         calculator = _calculator;
     }
 
-    /**
-     *
-     * @param index
-     * @param query
-     * @param stopwords
-     * @param tfType
-     * @param isUsingIdf
-     * @param isNormalized
-     * @param useStemmer
-     * @return list of (silimarity, documentId)
-     */
-    public List<Pair<Double, Integer>> search(Index index, String query, Set<Term> stopwords, Calculator.TFType tfType, boolean isUsingIdf, boolean isNormalized, boolean useStemmer) {
+    public List<Pair<Double, Integer>> search(Index index, String query, Set<Term> stopwords, Calculator.TFType tfType,
+                                              boolean isUsingIdf, boolean isNormalized, boolean useStemmer) {
         // Make Term Stream from the query.
         StringTermStream stringTermStream = new StringTermStream(query, "\\W");
         StopwordTermStream stopwordTermStream = new StopwordTermStream(stringTermStream, stopwords);
@@ -65,7 +55,7 @@ public class Searcher {
         // select indexedDocuments with similarity > 0
         List<Pair<Double, Integer>> selectedSimilairtyDocIDs = new ArrayList<>();
         for (Pair<Double, Integer> similarityDocID : similarityDocIDList) {
-            if (similarityDocID.first > 0) {
+            if (similarityDocID.first > EPSILON) {
                 selectedSimilairtyDocIDs.add(similarityDocID);
             }
         }
@@ -92,4 +82,6 @@ public class Searcher {
             termDoubleEntry.setValue(termDoubleEntry.getValue() * idf);
         }
     }
+
+    private static final double EPSILON = 1E-6;
 }

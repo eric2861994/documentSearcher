@@ -69,7 +69,7 @@ public class RelevanceJudge {
                             queryString.setLength(0);
                         }
 
-                        if (line.length() > 3) id = Integer.parseInt(line.substring(3)); // TODO fix this kayu
+                        if (line.length() > 3) id = Integer.parseInt(line.substring(3));
                     }
                     numOfQuery++;
                 } else {
@@ -181,7 +181,6 @@ public class RelevanceJudge {
                     precisionAccum += precision;
                 }
             }
-            System.out.println(precisionAccum);
             return precisionAccum / queryRelation.get(queryId).size();
         }
     }
