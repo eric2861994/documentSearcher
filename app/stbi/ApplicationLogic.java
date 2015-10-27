@@ -264,8 +264,8 @@ public class ApplicationLogic {
             List<SearchResultEntry> searchResult = new ArrayList<>();
             for (int i = 0; i < documentSimilarityList.size(); i++) {
                 Pair<Double, Integer> documentSimilarity = documentSimilarityList.get(i);
-
-                relevantDocuments.add(documentSimilarity.second);
+                int docID = index.getIndexedDocument(documentSimilarity.second).getId();
+                relevantDocuments.add(docID);
                 searchResult.add(new SearchResultEntry(
                         i + 1,
                         documentSimilarity.first,
