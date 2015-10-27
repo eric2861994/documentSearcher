@@ -6,7 +6,7 @@
     Precision: @result.getPrecision <br/>
     Recall: @result.getRecall <br/>
     Non Interpolated Average Precision: @result.getNoninterpolatedAveragePrecision <br/>
-    <table class="display" cellspacing="0" width="100%">
+    <table class="display example" cellspacing="0" width="100%">
         <thead>
             <tr>
                 <th>Number</th>
@@ -30,14 +30,14 @@
     <br/>
 } {
     @*todo implement this*@
-    @*<script type="text/javascript">*@
-    @*$(document).ready(function() {*@
-    @*$('#example').DataTable({*@
-    @*"paging": true,*@
-    @*"ordering": true,*@
-    @*"info": true,*@
-    @*"order": [[ 0, "desc" ]]*@
-    @*});*@
-    @*} );*@
-    @*</script>*@
+    <script type="text/javascript">
+    $(document).ready(function() {
+    $('.example').DataTable({
+    "paging": true,
+    "ordering": true,
+    "info": true,
+    "order": [[ 0, "desc" ]]
+    });
+    } );
+    </script>
 }

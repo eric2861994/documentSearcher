@@ -78,8 +78,13 @@ public class Searcher {
 
     private void addIdfToWeight(Map<Term, Double> termsWeight, Index index) {
         for (Map.Entry<Term, Double> termDoubleEntry : termsWeight.entrySet()) {
-            double idf = Math.log10((double) index.getAllDocumentCount() / index.getDocumentCount(termDoubleEntry.getKey()));
-            termDoubleEntry.setValue(termDoubleEntry.getValue() * idf);
+            if (index.getDocumentCount(termDoubleEntry.getKey()) > 0) {
+                double idf = Math.log10((double) index.getAllDocumentCount() / index.getDocumentCount(termDoubleEntry.getKey()));
+                termDoubleEntry.setValue(termDoubleEntry.getValue() * idf);
+
+            } else {
+                termDoubleEntry.setValue(0.0);
+            }
         }
     }
 

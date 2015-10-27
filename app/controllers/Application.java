@@ -89,7 +89,6 @@ public class Application extends Controller {
             appLogic.indexDocuments(documentsFile, tfType, dIdf, dNormalization, dStemmer);
             appLogic.saveIndexingSettings(indexingDocumentStub);
             flash("success", "The file has been created");
-
         } catch (IOException e) {
             flash("error", "The file cannot be created " + "(" + e.getMessage() + ")");
         }
