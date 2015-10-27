@@ -1,1 +1,1 @@
-{"stopwordLocation":null,"documentLocation":"dataset/ADI/adi.all","tf":"AUGMENTED_TF","useIdf":true,"useNormalization":true,"useStemmer":true,"useStopwords":false}
+{"stopwordLocation":null,"documentLocation":"dataset/CISI/cisi.all","tf":"RAW_TF","useIdf":false,"useNormalization":false,"useStemmer":false,"useStopwords":false}
