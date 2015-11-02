@@ -1,0 +1,17 @@
+@import formstubs.ExperimentalRetrievalStub
+@import helper.myPlainFieldConstructor
+@import views.html.helper.FieldConstructor
+@(title: String)(experimentalRetrievalForm: Form[ExperimentalRetrievalStub])
+@implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
+
+@main(title = title) {
+    @helper.form(action = routes.Application.postSummary(), 'id -> "myForm") {
+        <div class="row form-horizontal">
+            @helper.inputText(experimentalRetrievalForm("queryLocation"), '_label -> "Query File")
+            @helper.inputText(experimentalRetrievalForm("relevantJudgementLocation"), '_label -> "Relevant Judgement")
+        </div>
+        <input type='submit' name='submit' value='Perform Experiment' class="btn btn-default" />
+    }
+} {
+
+}

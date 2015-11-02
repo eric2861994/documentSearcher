@@ -205,4 +205,18 @@ public class Application extends Controller {
         int idx = Integer.parseInt(s);
         return ok(experimentdetail.render("Detail Eksperimen", appLogic.getExperimentResult(idx)));
     }
+
+    public static Result summary(){
+        ExperimentalRetrievalStub experimentalRetrievalStub = appLogic.getExperimentSettings();
+        Form<ExperimentalRetrievalStub> experimentalRetrievalStubForm = Form.form(ExperimentalRetrievalStub.class)
+                .fill(experimentalRetrievalStub);
+        return ok(summary.render("SUMMARY", experimentalRetrievalStubForm));
+    }
+
+    public static Result postSummary() throws IOException {
+        Form<ExperimentalRetrievalStub> experimentalRetrievalStubForm = Form.form(ExperimentalRetrievalStub.class);
+        ExperimentalRetrievalStub experimentalRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
+        appLogic.writeSummary();
+        return ok();
+    }
 }

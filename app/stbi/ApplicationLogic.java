@@ -241,7 +241,7 @@ public class ApplicationLogic {
                 Play.application().getFile(relevanceJudgementPath)
         );
 
-        File file = new File("output.txt");
+        File file = new File(getExperimentOption().getTfType()+"-"+getExperimentOption().isUseIDF()+"-"+getExperimentOption().isUseNormalization()+"-"+getExperimentOption().isUseStemmer()+".csv");
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -301,5 +301,97 @@ public class ApplicationLogic {
 
     public static ApplicationLogic getInstance() {
         return oneInstance;
+    }
+
+    public void writeSummary () throws IOException {
+        // START OF SETTING
+        // Ubah settingan untuk 2 jenis Data dan Stemming atau tidak
+        String queryPath = "dataset/ADI/query.text";
+        String relevanceJudgementPath = "dataset/ADI/qrels.text";
+        String documentLocation = "dataset/ADI/adi.all";
+        // END OF SETTING
+
+        // Relevance Judgement
+        RelevanceJudge relevanceJudge = new RelevanceJudge(
+                new File(queryPath),
+                new File(relevanceJudgementPath));
+
+        // Get experiment queries
+        List<RelevanceJudge.Query> testQueries = relevanceJudge.getQueryList();
+
+        File file = new File("relevanceSummary.csv");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        FileWriter writer = new FileWriter(file);
+        writer.write("");
+
+        writer.append("\"Indexer TF Type\", \"Indexer Use IDF\", \"Indexer Use Norm\", \"Query TF Type\", " +
+                "\"Query Use IDF\", \"Query Use Norm\", \"Use Stemming\", \"Precision Avg\", \"Recall Avg\", \"NonInterpolated Prec Avg\"\n");
+        for(int useStemming=0; useStemming <2; useStemming++){
+            for(Calculator.TFType tfType : Calculator.TFType.values()){
+                for(int useIdf=0; useIdf<2; useIdf++){
+                    for(int useNorm=0; useNorm<2; useNorm++){
+                        // Indexing
+                        this.indexDocuments(new File(documentLocation),
+                                tfType, useIdf > 0, useNorm > 0, useStemming > 0);
+
+                        for(Calculator.TFType queryTfType : Calculator.TFType.values() ){
+                            for(int queryUseIdf=0; queryUseIdf <2; queryUseIdf++){
+                                for(int queryUseNorm=0; queryUseNorm <2; queryUseNorm++){
+                                    double recallSum = 0;
+                                    double precisionSum = 0;
+                                    double nonInterpolatedPrecSum=0;
+
+
+                                    // Iterate all query
+                                    for(RelevanceJudge.Query query : testQueries){
+                                        // perform search on query
+                                        List<Pair<Double, Integer>> documentSimilarityList =
+                                                this.searcher.search(
+                                                        this.index,
+                                                        query.queryString,
+                                                        this.stopwords,
+                                                        queryTfType,
+                                                        queryUseIdf>0,
+                                                        queryUseNorm>0,
+                                                        useStemming>0);
+
+                                        // Get all document id of search result, as it is needed
+                                        List<Integer> relevantDocuments = new ArrayList<>();
+                                        List<SearchResultEntry> searchResult = new ArrayList<>();
+                                        for(int i=0; i< documentSimilarityList.size(); i++){
+                                            Pair<Double, Integer> documentSimilarity = documentSimilarityList.get(i);
+                                            int docID = this.index.getIndexedDocument(documentSimilarity.second).getId();
+                                            relevantDocuments.add(docID);
+                                            searchResult.add(new SearchResultEntry(
+                                                    i + 1,
+                                                    documentSimilarity.first,
+                                                    this.index.getIndexedDocument(documentSimilarity.second)
+                                            ));
+                                        }
+
+                                        // Evaluate a query
+                                        RelevanceJudge.Evaluation eval = relevanceJudge.evaluate(query.id, relevantDocuments);
+                                        precisionSum += (double) eval.precision;
+                                        recallSum += (double) eval.recall;
+                                        nonInterpolatedPrecSum += (double) eval.nonInterpolatedPrecision;
+
+                                    }
+                                    String line = "\""+ tfType.name()+"\""+","+ useIdf +","+ useNorm +","+ queryTfType.name() +","+ queryUseIdf +","+ queryUseNorm +","+
+                                            useStemming +","+ precisionSum/testQueries.size() +","+ recallSum/testQueries.size() +","+
+                                            nonInterpolatedPrecSum/testQueries.size() + "\n";
+                                    writer.append(line);
+                                }
+                            }
+                        }
+
+
+                    }
+                }
+            }
+        }
+
+        writer.close();
     }
 }
