@@ -5,10 +5,7 @@ import stbi.common.term.Term;
 import stbi.indexer.RawDocument;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Files Loader.
@@ -149,6 +146,36 @@ public class Loader {
                 outputStream.close();
             }
         }
+    }
+
+    /**
+     * Save index to readable csv format
+     *
+     * @param indexFile indexFile
+     * @param modifiedInvertedIndex index
+     * @throws IOException
+     */
+    public void saveReadableIndex(File indexFile, ModifiedInvertedIndex modifiedInvertedIndex) throws IOException{
+        PrintWriter printWriter = new PrintWriter(indexFile);
+
+        try {
+            Map<Term, Map<Integer, Double>> termDocumentWeight = modifiedInvertedIndex.getTermDocumentWeight();
+            printWriter.println("\"Term\",\"Document\",\"Weight\"");
+            for (Map.Entry<Term, Map<Integer, Double>> documentWeightEntry : termDocumentWeight.entrySet()) {
+                boolean firstRow = true;
+                for (Map.Entry<Integer, Double> weightEntry : documentWeightEntry.getValue().entrySet()) {
+                    if (firstRow) {
+                        printWriter.printf("\"%s\"", documentWeightEntry.getKey().toString());
+                        firstRow = false;
+                    }
+                    int documentId = modifiedInvertedIndex.getIndexedDocument(weightEntry.getKey()).getId();
+                    printWriter.printf(",%d,%lf\n", documentId, weightEntry.getValue());
+                }
+            }
+        } finally {
+            printWriter.close();
+        }
+
     }
 
     /**
