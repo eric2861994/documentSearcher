@@ -47,6 +47,7 @@ public class ApplicationLogic {
     private final ModifiedInvertedIndexer modifiedInvertedIndexer = new ModifiedInvertedIndexer(calculator);
     private final Searcher searcher = new Searcher(calculator);
     private final File indexFile;
+    private final File readableIndexFile;
     private final File indexSettingFile;
     private final File stopwordSettingFile;
     private final File interactiveSearchSettings;
@@ -58,6 +59,7 @@ public class ApplicationLogic {
 
     private ApplicationLogic() {
         indexFile = Play.application().getFile(INDEX_FILE_PATH);
+        readableIndexFile = Play.application().getFile(INDEX_FILE_PATH+"csv");
         indexSettingFile = Play.application().getFile(INDEXING_SETTING_PATH);
         stopwordSettingFile = Play.application().getFile(STOPWORD_SETTING_PATH);
         interactiveSearchSettings = Play.application().getFile(INTERACTIVE_RETRIEVAL_PATH);
@@ -106,6 +108,7 @@ public class ApplicationLogic {
         index = modifiedInvertedIndexer.createIndex(documents, stopwords, tfType, useIDF, useNormalization, useStemmer);
 
         loader.saveIndex(indexFile, (ModifiedInvertedIndex) index);
+        loader.saveReadableIndex(readableIndexFile, (ModifiedInvertedIndex) index);
     }
 
     public boolean indexLoaded() {
