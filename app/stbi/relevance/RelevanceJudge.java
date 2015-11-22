@@ -4,10 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class RelevanceJudge {
 
@@ -33,7 +30,7 @@ public class RelevanceJudge {
     private static final char QUERY_SECTION_QUERY_STRING = 'W';
 
     private List<Query> queryList;
-    private Map<Integer, List<Integer>> queryRelation;
+    private Map<Integer, Set<Integer>> queryRelation;
 
     public RelevanceJudge(File queryFile, File queryRelationFile) throws IOException {
         queryList = new ArrayList<>();
@@ -109,7 +106,7 @@ public class RelevanceJudge {
                 int documentId = Integer.parseInt(token[1]);
 
                 if (!queryRelation.containsKey(queryId)) {
-                    queryRelation.put(queryId, new ArrayList<Integer>());
+                    queryRelation.put(queryId, new HashSet<Integer>());
                 }
                 queryRelation.get(queryId).add(documentId);
 
@@ -129,32 +126,46 @@ public class RelevanceJudge {
 
     public Evaluation evaluate(int queryId, List<Integer> documentIdList) {
         Evaluation evaluation = new Evaluation();
-        evaluation.nonInterpolatedPrecision = computeNonInterpolatedPrecision(queryId, documentIdList);
+        evaluation.nonInterpolatedPrecision = computeNonInterpolatedPrecision(queryId, documentIdList,0);
         evaluation.precision = computePrecision(queryId, documentIdList);
-        evaluation.recall = computeRecall(queryId, documentIdList);
-        evaluation.interpolatedPrecision = computeInterpolatedPrecision(queryId, documentIdList);
+        evaluation.recall = computeRecall(queryId, documentIdList,0);
+        evaluation.interpolatedPrecision = computeInterpolatedPrecision(queryId, documentIdList,0);
         return evaluation;
     }
 
-    private boolean isDocumentRelevant(int queryId, int documentId) {
-        List<Integer> documentIdList = queryRelation.get(queryId);
-        if (documentIdList == null) return false;
+    public Evaluation evaluate(int queryId, List<Integer> documentIdList, List<Integer> filterIdList) {
+        Evaluation evaluation = new Evaluation();
 
-        for (int i = 0; i < documentIdList.size(); i++) {
-            int currentDocumentIdinList = documentIdList.get(i);
-            if (currentDocumentIdinList == documentId) return true;
+        int numFilter = 0;
+        for (Integer filterId : filterIdList) {
+            if (isDocumentRelevant(queryId,filterId)) numFilter += 1;
         }
-        return false;
+
+        evaluation.nonInterpolatedPrecision = computeNonInterpolatedPrecision(queryId, documentIdList,numFilter);
+        evaluation.precision = computePrecision(queryId, documentIdList);
+        evaluation.recall = computeRecall(queryId, documentIdList,numFilter);
+        evaluation.interpolatedPrecision = computeInterpolatedPrecision(queryId, documentIdList,numFilter);
+        return evaluation;
     }
 
-    public float computeRecall(int queryId, List<Integer> documentIdList) {
+
+    private boolean isDocumentRelevant(int queryId, int documentId) {
+        Set<Integer> documentIdList = queryRelation.get(queryId);
+        if (documentIdList == null) return false;
+
+        return documentIdList.contains(documentId);
+    }
+
+    public float computeRecall(int queryId, List<Integer> documentIdList, int numFilter) {
         if (queryRelation.get(queryId) == null) return 0;
         else {
             int nOfRelevantDocumentInQuery = 0;
             for (int i = 0; i < documentIdList.size(); i++) {
                 if (isDocumentRelevant(queryId, documentIdList.get(i))) nOfRelevantDocumentInQuery++;
             }
-            return (float) nOfRelevantDocumentInQuery / queryRelation.get(queryId).size();
+            int nRelevantDocument = queryRelation.get(queryId).size() - numFilter;
+            if (nRelevantDocument == 0) return 0;
+            return (float) nOfRelevantDocumentInQuery / nRelevantDocument;
         }
     }
 
@@ -165,11 +176,12 @@ public class RelevanceJudge {
             for (int i = 0; i < documentIdList.size(); i++) {
                 if (isDocumentRelevant(queryId, documentIdList.get(i))) nOfRelevantDocumentInQuery++;
             }
+            if (documentIdList.size() == 0) return 0;
             return (float) nOfRelevantDocumentInQuery / documentIdList.size();
         }
     }
 
-    public float computeNonInterpolatedPrecision(int queryId, List<Integer> documentIdList) {
+    public float computeNonInterpolatedPrecision(int queryId, List<Integer> documentIdList, int numFilter) {
         if (queryRelation.get(queryId) == null) return 0;
         else {
             float precisionAccum = 0;
@@ -181,18 +193,20 @@ public class RelevanceJudge {
                     precisionAccum += precision;
                 }
             }
+            int nRelevantDocument = queryRelation.get(queryId).size() - numFilter;
+            if (nRelevantDocument == 0) return 0;
             return precisionAccum / queryRelation.get(queryId).size();
         }
     }
 
-    public float computeInterpolatedPrecision(int queryId, List<Integer> documentIdList) {
+    public float computeInterpolatedPrecision(int queryId, List<Integer> documentIdList, int numFilter) {
         if (queryRelation.get(queryId) == null) return 0;
         else {
 
             float precisionAccum = 0;
             int nOfRelevantDocumentInQuery = 0;
             int prevStep = 0;
-            int nOfRelevantDocument = queryRelation.get(queryId).size();
+            int nOfRelevantDocument = queryRelation.get(queryId).size() - numFilter;
 
             for (int i = 0; i < documentIdList.size(); i++) {
                 if (isDocumentRelevant(queryId, documentIdList.get(i))) {

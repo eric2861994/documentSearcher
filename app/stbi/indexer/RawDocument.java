@@ -31,7 +31,7 @@ public class RawDocument implements Serializable {
         return title;
     }
 
-    String getBody() {
+    public String getBody() {
         return body;
     }
 
