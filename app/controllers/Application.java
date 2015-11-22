@@ -14,6 +14,7 @@ import stbi.common.IndexedDocument;
 import stbi.common.Option;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
+import stbi.common.util.RelevanceFeedbackAlgorithm;
 import views.html.*;
 
 import java.io.File;
@@ -113,8 +114,14 @@ public class Application extends Controller {
         boolean dNormalization = interactiveSearchSettings.isUseNormalization();
         boolean dStemmer = interactiveSearchSettings.isUseStemmer();
 
+        RelevanceFeedbackAlgorithm dRelevanceFeedbackAlgorithm = interactiveSearchSettings.getRelevanceFeedback();
+        boolean dUseSameDocumentCollection = interactiveSearchSettings.isUseSameDocumentCollection();
+        int dS = interactiveSearchSettings.getS();
+        int dN = interactiveSearchSettings.getN();
+        boolean dUseQueryExpansion = interactiveSearchSettings.isUseQueryExpansion();
+
         try {
-            appLogic.setSearchOption(new Option(tfType, dIdf, dNormalization, dStemmer));
+            appLogic.setSearchOption(new Option(tfType, dIdf, dNormalization, dStemmer, dRelevanceFeedbackAlgorithm, dUseSameDocumentCollection, dS, dN, dUseQueryExpansion));
             return redirect("/interactive");
 
         } catch (IOException e) {
@@ -169,7 +176,12 @@ public class Application extends Controller {
                     experimentalRetrievalStub.getTf(),
                     experimentalRetrievalStub.isUseIdf(),
                     experimentalRetrievalStub.isUseNormalization(),
-                    experimentalRetrievalStub.isUseStemmer()
+                    experimentalRetrievalStub.isUseStemmer(),
+                    experimentalRetrievalStub.getRelevanceFeedback(),
+                    experimentalRetrievalStub.isUseSameDocumentCollection(),
+                    experimentalRetrievalStub.getS(),
+                    experimentalRetrievalStub.getN(),
+                    experimentalRetrievalStub.isUseQueryExpansion()
             ));
             flash("success", "Experiment Options have been saved");
             return redirect("/experimental");

@@ -94,7 +94,11 @@ public class ApplicationLogic {
         experimentalRetrievalStub.setUseIdf(option.isUseIDF());
         experimentalRetrievalStub.setUseNormalization(option.isUseNormalization());
         experimentalRetrievalStub.setUseStemmer(option.isUseStemmer());
-
+        experimentalRetrievalStub.setRelevanceFeedback(option.getRelevanceFeedback());
+        experimentalRetrievalStub.setUseSameDocumentCollection(option.isUseSameDocumentCollection());
+        experimentalRetrievalStub.setS(option.getS());
+        experimentalRetrievalStub.setN(option.getN());
+        experimentalRetrievalStub.setUseQueryExpansion(option.isUseQueryExpansion());
         return experimentalRetrievalStub;
     }
 
