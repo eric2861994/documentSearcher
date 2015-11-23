@@ -18,7 +18,7 @@ public class RetrievalStub extends StopwordsStub {
     public RetrievalStub() {
         super();
         setTf(Calculator.TFType.RAW_TF);
-        setRelevanceFeedback(RelevanceFeedbackAlgorithm.ROCCHIO);
+        setRelevanceFeedback(RelevanceFeedbackAlgorithm.NO_RELEVANCE_FEEDBACK);
     }
 
     public RetrievalStub(RetrievalStub retrievalStub) {

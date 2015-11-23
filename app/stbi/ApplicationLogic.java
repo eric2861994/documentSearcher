@@ -278,10 +278,11 @@ public class ApplicationLogic {
                         documentSimilarity.first,
                         index.getIndexedDocument(documentSimilarity.second)
                 ));
+
             }
 
             // evaluate a query
-                RelevanceJudge.Evaluation eval = relevanceJudge.evaluate(query.id, relevantDocuments);
+            RelevanceJudge.Evaluation eval = relevanceJudge.evaluate(query.id, relevantDocuments);
 
             ExperimentResult experResult = new ExperimentResult(query.queryString,
                     (double) eval.precision, (double) eval.recall, (double) eval.nonInterpolatedPrecision, searchResult);

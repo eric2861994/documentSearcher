@@ -18,7 +18,7 @@ public class Option {
     private boolean useQueryExpansion;
 
     public Option() {
-        this(Calculator.TFType.RAW_TF, false, false, false, RelevanceFeedbackAlgorithm.ROCCHIO, false, 0, 0, false);
+        this(Calculator.TFType.RAW_TF, false, false, false, RelevanceFeedbackAlgorithm.NO_RELEVANCE_FEEDBACK, false, 0, 0, false);
     }
 
     public Option(Calculator.TFType _tfType, boolean _useIDF, boolean _useNormalization, boolean _useStemmer, RelevanceFeedbackAlgorithm relevanceFeedback, boolean useSameDocumentCollection, int S, int N, boolean useQueryExpansion) {

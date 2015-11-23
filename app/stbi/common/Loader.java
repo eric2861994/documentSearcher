@@ -169,7 +169,7 @@ public class Loader {
                         firstRow = false;
                     }
                     int documentId = modifiedInvertedIndex.getIndexedDocument(weightEntry.getKey()).getId();
-                    printWriter.printf(",%d,%lf\n", documentId, weightEntry.getValue());
+                    printWriter.printf(",%d,%f\n", documentId, weightEntry.getValue());
                 }
             }
         } finally {
