@@ -70,4 +70,9 @@ public class ModifiedInvertedIndex implements Index, Serializable {
     public IndexedDocument getIndexedDocument(int docID) {
         return indexedDocuments[docID];
     }
+
+    public  Map<Term, Map<Integer, Double>> getTermDocumentWeight(){
+        return termDocumentWeight;
+    }
+
 }
