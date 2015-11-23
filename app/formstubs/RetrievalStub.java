@@ -1,7 +1,8 @@
 package formstubs;
 
 import stbi.common.util.Calculator;
-import stbi.common.util.RelevanceFeedbackAlgorithm;
+import stbi.common.util.RelevanceFeedbackOption;
+import stbi.common.util.RelevanceFeedbackStatus;
 
 public class RetrievalStub extends StopwordsStub {
     protected boolean useIdf;
@@ -9,7 +10,8 @@ public class RetrievalStub extends StopwordsStub {
     protected boolean useNormalization;
     protected boolean useStemmer;
     protected boolean useStopwords;
-    protected RelevanceFeedbackAlgorithm relevanceFeedback;
+    protected RelevanceFeedbackStatus relevanceFeedbackStatus;
+    protected RelevanceFeedbackOption relevanceFeedbackOption;
     protected boolean useSameDocumentCollection;
     protected int S;
     protected int N;
@@ -18,7 +20,7 @@ public class RetrievalStub extends StopwordsStub {
     public RetrievalStub() {
         super();
         setTf(Calculator.TFType.RAW_TF);
-        setRelevanceFeedback(RelevanceFeedbackAlgorithm.NO_RELEVANCE_FEEDBACK);
+        setRelevanceFeedbackStatus(RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK);
     }
 
     public RetrievalStub(RetrievalStub retrievalStub) {
@@ -27,7 +29,7 @@ public class RetrievalStub extends StopwordsStub {
         setTf(retrievalStub.getTf());
         setUseNormalization(retrievalStub.isUseNormalization());
         setUseStemmer(retrievalStub.isUseStemmer());
-        setRelevanceFeedback(retrievalStub.getRelevanceFeedback());
+        setRelevanceFeedbackStatus(retrievalStub.getRelevanceFeedbackStatus());
         setUseSameDocumentCollection(retrievalStub.isUseSameDocumentCollection());
         setS(retrievalStub.getS());
         setN(retrievalStub.getN());
@@ -66,12 +68,12 @@ public class RetrievalStub extends StopwordsStub {
         this.useStemmer = useStemmer;
     }
 
-    public RelevanceFeedbackAlgorithm getRelevanceFeedback() {
-        return relevanceFeedback;
+    public RelevanceFeedbackStatus getRelevanceFeedbackStatus() {
+        return relevanceFeedbackStatus;
     }
 
-    public void setRelevanceFeedback(RelevanceFeedbackAlgorithm relevanceFeedback) {
-        this.relevanceFeedback = relevanceFeedback;
+    public void setRelevanceFeedbackStatus(RelevanceFeedbackStatus relevanceFeedbackStatus) {
+        this.relevanceFeedbackStatus = relevanceFeedbackStatus;
     }
 
     public boolean isUseSameDocumentCollection() {

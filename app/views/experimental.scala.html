@@ -34,8 +34,12 @@
                         options = views.html.helper.options("false" -> "No", "true" -> "Yes"))
                     </div>
                     <div class="form-group">
-                    @helper.inputRadioGroup(experimentalRetrievalForm("relevanceFeedback"),
-                        options = views.html.helper.options("NO_RELEVANCE_FEEDBACK" -> "No Relevance Feedback", "ROCCHIO" -> "Rocchio", "IDE_REGULER" -> "Ide Reguler","IDE_DEC_HI" -> "Ide Dec Hi", "PSEUDO_RELEVANCE_FEEDBACK" -> "Pseudo Relevance Feedback"))
+                    @helper.inputRadioGroup(experimentalRetrievalForm("relevanceFeedbackStatus"),
+                        options = views.html.helper.options("NO_RELEVANCE_FEEDBACK" -> "No Relevance Feedback", "USE_RELEVANCE_FEEDBACK" -> "Use Relevance Feedback", "PSEUDO_RELEVANCE_FEEDBACK" -> "Pseudo Relevance Feedback"))
+                    </div>
+                    <div class="form-group">
+                    @helper.inputRadioGroup(experimentalRetrievalForm("relevanceFeedbackOption"),
+                        options = views.html.helper.options("ROCCHIO" -> "Rocchio", "IDE_REGULER" -> "Ide Reguler","IDE_DEC_HI" -> "Ide Dec Hi"))
                     </div>
                     <div class="form-group">
                     @helper.inputRadioGroup(experimentalRetrievalForm("useSameDocumentCollection"),

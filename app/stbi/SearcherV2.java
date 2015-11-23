@@ -72,7 +72,7 @@ public class SearcherV2 {
             case IDE:
                 return RelevanceFeedbackUtils.ideQueryReweighting(initialQuery, relevantVectors, irrelevantVectors, doExpansion);
             case DEC_HI:
-                return RelevanceFeedbackUtils.deHaiQueryReweighting(initialQuery, relevantVectors, irrelevantVectors, doExpansion);
+                return RelevanceFeedbackUtils.deHaiQueryReweighting(initialQuery, relevantVectors, irrelevantVectors.get(0), doExpansion);
         }
         // ASSUME this never happen
         return null;

@@ -14,7 +14,7 @@ import stbi.common.IndexedDocument;
 import stbi.common.Option;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
-import stbi.common.util.RelevanceFeedbackAlgorithm;
+import stbi.common.util.RelevanceFeedbackStatus;
 import views.html.*;
 
 import java.io.File;
@@ -114,14 +114,14 @@ public class Application extends Controller {
         boolean dNormalization = interactiveSearchSettings.isUseNormalization();
         boolean dStemmer = interactiveSearchSettings.isUseStemmer();
 
-        RelevanceFeedbackAlgorithm dRelevanceFeedbackAlgorithm = interactiveSearchSettings.getRelevanceFeedback();
+        RelevanceFeedbackStatus dRelevanceFeedbackStatus = interactiveSearchSettings.getRelevanceFeedbackStatus();
         boolean dUseSameDocumentCollection = interactiveSearchSettings.isUseSameDocumentCollection();
         int dS = interactiveSearchSettings.getS();
         int dN = interactiveSearchSettings.getN();
         boolean dUseQueryExpansion = interactiveSearchSettings.isUseQueryExpansion();
 
         try {
-            appLogic.setSearchOption(new Option(tfType, dIdf, dNormalization, dStemmer, dRelevanceFeedbackAlgorithm, dUseSameDocumentCollection, dS, dN, dUseQueryExpansion));
+            appLogic.setSearchOption(new Option(tfType, dIdf, dNormalization, dStemmer, dRelevanceFeedbackStatus, dUseSameDocumentCollection, dS, dN, dUseQueryExpansion));
             return redirect("/interactive");
 
         } catch (IOException e) {
@@ -177,7 +177,7 @@ public class Application extends Controller {
                     experimentalRetrievalStub.isUseIdf(),
                     experimentalRetrievalStub.isUseNormalization(),
                     experimentalRetrievalStub.isUseStemmer(),
-                    experimentalRetrievalStub.getRelevanceFeedback(),
+                    experimentalRetrievalStub.getRelevanceFeedbackStatus(),
                     experimentalRetrievalStub.isUseSameDocumentCollection(),
                     experimentalRetrievalStub.getS(),
                     experimentalRetrievalStub.getN(),

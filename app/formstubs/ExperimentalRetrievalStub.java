@@ -9,7 +9,7 @@ public class ExperimentalRetrievalStub extends RetrievalStub {
         relevantJudgementLocation = "";
     }
 
-    public ExperimentalRetrievalStub(ExperimentalRetrievalStub experimentalRetrievalStub) {
+    public ExperimentalRetrievalStub (ExperimentalRetrievalStub experimentalRetrievalStub) {
         super(experimentalRetrievalStub);
         setQueryLocation(experimentalRetrievalStub.getQueryLocation());
         setRelevantJudgementLocation(experimentalRetrievalStub.getRelevantJudgementLocation());

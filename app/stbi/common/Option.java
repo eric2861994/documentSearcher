@@ -1,7 +1,8 @@
 package stbi.common;
 
 import stbi.common.util.Calculator;
-import stbi.common.util.RelevanceFeedbackAlgorithm;
+import stbi.common.util.RelevanceFeedbackOption;
+import stbi.common.util.RelevanceFeedbackStatus;
 
 /**
  * Search/Indexing options.
@@ -11,26 +12,28 @@ public class Option {
     private boolean useIDF;
     private boolean useNormalization;
     private boolean useStemmer;
-    private RelevanceFeedbackAlgorithm relevanceFeedback;
+    private RelevanceFeedbackStatus relevanceFeedbackStatus;
+    private RelevanceFeedbackOption relevanceFeedbackOption;
     private boolean useSameDocumentCollection;
     private int S;
     private int N;
     private boolean useQueryExpansion;
 
     public Option() {
-        this(Calculator.TFType.RAW_TF, false, false, false, RelevanceFeedbackAlgorithm.NO_RELEVANCE_FEEDBACK, false, 0, 0, false);
+        this(Calculator.TFType.RAW_TF, false, false, false, RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK, RelevanceFeedbackOption.ROCCHIO, false, 0, 0, false);
     }
 
-    public Option(Calculator.TFType _tfType, boolean _useIDF, boolean _useNormalization, boolean _useStemmer, RelevanceFeedbackAlgorithm relevanceFeedback, boolean useSameDocumentCollection, int S, int N, boolean useQueryExpansion) {
+    public Option(Calculator.TFType _tfType, boolean _useIDF, boolean _useNormalization, boolean _useStemmer, RelevanceFeedbackStatus relevanceFeedbackStatus, RelevanceFeedbackOption relevanceFeedbackOption, boolean useSameDocumentCollection, int S, int N, boolean useQueryExpansion) {
         setTfType(_tfType);
         setUseIDF(_useIDF);
         setUseNormalization(_useNormalization);
         setUseStemmer(_useStemmer);
-        setRelevanceFeedback(relevanceFeedback);
+        setRelevanceFeedbackStatus(relevanceFeedbackStatus);
         setUseSameDocumentCollection(useSameDocumentCollection);
         setS(S);
         setN(N);
         setUseQueryExpansion(useQueryExpansion);
+        setRelevanceFeedbackOption(relevanceFeedbackOption);
     }
 
     public Calculator.TFType getTfType() {
@@ -65,12 +68,12 @@ public class Option {
         this.useStemmer = useStemmer;
     }
 
-    public RelevanceFeedbackAlgorithm getRelevanceFeedback() {
-        return relevanceFeedback;
+    public RelevanceFeedbackStatus getRelevanceFeedbackStatus() {
+        return relevanceFeedbackStatus;
     }
 
-    public void setRelevanceFeedback(RelevanceFeedbackAlgorithm relevanceFeedback) {
-        this.relevanceFeedback = relevanceFeedback;
+    public void setRelevanceFeedbackStatus(RelevanceFeedbackStatus relevanceFeedbackStatus) {
+        this.relevanceFeedbackStatus = relevanceFeedbackStatus;
     }
 
     public boolean isUseSameDocumentCollection() {
@@ -103,5 +106,13 @@ public class Option {
 
     public void setUseQueryExpansion(boolean useQueryExpansion) {
         this.useQueryExpansion = useQueryExpansion;
+    }
+
+    public RelevanceFeedbackOption getRelevanceFeedbackOption() {
+        return relevanceFeedbackOption;
+    }
+
+    public void setRelevanceFeedbackOption(RelevanceFeedbackOption relevanceFeedbackOption) {
+        this.relevanceFeedbackOption = relevanceFeedbackOption;
     }
 }

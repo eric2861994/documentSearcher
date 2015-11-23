@@ -23,10 +23,7 @@ import stbi.relevance.RelevanceJudge;
 import stbi.searcher.Searcher;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 /**
  * Application Logic.
@@ -96,7 +93,7 @@ public class ApplicationLogic {
         experimentalRetrievalStub.setUseIdf(option.isUseIDF());
         experimentalRetrievalStub.setUseNormalization(option.isUseNormalization());
         experimentalRetrievalStub.setUseStemmer(option.isUseStemmer());
-        experimentalRetrievalStub.setRelevanceFeedback(option.getRelevanceFeedback());
+        experimentalRetrievalStub.setRelevanceFeedbackStatus(option.getRelevanceFeedbackStatus());
         experimentalRetrievalStub.setUseSameDocumentCollection(option.isUseSameDocumentCollection());
         experimentalRetrievalStub.setS(option.getS());
         experimentalRetrievalStub.setN(option.getN());
@@ -228,8 +225,9 @@ public class ApplicationLogic {
         }
 
         Option searchOption = getSearchOption();
-        return searcher.search(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
+        Map<Term, Double> queryVectorSearcher = searcher.getQueryVector(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
                 searchOption.isUseNormalization(), searchOption.isUseStemmer());
+        return searcher.search(index, queryVectorSearcher);
     }
 
     public void saveIndexingSettings(IndexingDocumentStub indexingDocumentStub) throws IOException {
@@ -263,8 +261,9 @@ public class ApplicationLogic {
         for (RelevanceJudge.Query query : testQueries) {
             // perform search on query
             Option option = getExperimentOption();
-            List<Pair<Double, Integer>> documentSimilarityList = searcher.search(index, query.queryString, stopwords,
+            Map<Term, Double> queryVectorSearcher = searcher.getQueryVector(index, query.queryString, stopwords,
                     option.getTfType(), option.isUseIDF(), option.isUseNormalization(), option.isUseStemmer());
+            List<Pair<Double, Integer>> documentSimilarityList = searcher.search(index, queryVectorSearcher);
 
             // get all document id of search result, as it is needed in relevanceJudge.evaluate
             List<Integer> relevantDocuments = new ArrayList<>();
@@ -355,15 +354,17 @@ public class ApplicationLogic {
                                     // Iterate all query
                                     for(RelevanceJudge.Query query : testQueries){
                                         // perform search on query
+                                        Map<Term, Double> queryVectorSearcher = searcher.getQueryVector(                                                        this.index,
+                                                query.queryString,
+                                                this.stopwords,
+                                                queryTfType,
+                                                queryUseIdf>0,
+                                                queryUseNorm>0,
+                                                useStemming>0);
                                         List<Pair<Double, Integer>> documentSimilarityList =
                                                 this.searcher.search(
                                                         this.index,
-                                                        query.queryString,
-                                                        this.stopwords,
-                                                        queryTfType,
-                                                        queryUseIdf>0,
-                                                        queryUseNorm>0,
-                                                        useStemming>0);
+                                                        queryVectorSearcher);
 
                                         // Get all document id of search result, as it is needed
                                         List<Integer> relevantDocuments = new ArrayList<>();
