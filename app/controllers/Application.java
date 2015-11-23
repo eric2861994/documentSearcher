@@ -1,9 +1,6 @@
 package controllers;
 
-import formstubs.ExperimentalRetrievalStub;
-import formstubs.IndexingDocumentStub;
-import formstubs.InteractiveRetrievalStub;
-import formstubs.StopwordsStub;
+import formstubs.*;
 import play.Play;
 import play.data.Form;
 import play.mvc.Controller;
@@ -152,8 +149,12 @@ public class Application extends Controller {
                 IndexedDocument document = appLogic.getIndexedDocument(similarityDocID.second);
                 display.add(new Pair<>(similarityDocID.first, document));
             }
+            if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK) {
+                return ok(interactivesearchnorelevancefeedback.render("RESULT", display));
+            } else {
+                return ok(interactivesearch.render("RESULT", display));
+            }
 
-            return ok(interactivesearch.render("RESULT", display));
 
         } catch (IndexedFileException e) {
             flash("error", "The file has not been indexed yet ");
@@ -233,5 +234,12 @@ public class Application extends Controller {
         ExperimentalRetrievalStub experimentalRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
         appLogic.writeSummary();
         return ok();
+    }
+
+    public static Result relFeedInteractive() {
+        Form<RelevanceFeedbackInteractiveStub> relevanceFeedbackInteractiveStubForm = Form.form(RelevanceFeedbackInteractiveStub.class);
+        RelevanceFeedbackInteractiveStub relevanceFeedbackInteractiveStub = relevanceFeedbackInteractiveStubForm.bindFromRequest().get();
+//        return ok(interactivesearchnorelevancefeedback.render("RESULT", display))
+        return play.mvc.Results.TODO;
     }
 }

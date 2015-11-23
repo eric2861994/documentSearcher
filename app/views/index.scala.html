@@ -1,7 +1,7 @@
 @import formstubs.IndexingDocumentStub
 @import helper.myPlainFieldConstructor
 @import views.html.helper.FieldConstructor
-@(title: String)(indexingDocumentForm:Form[IndexingDocumentStub] )
+@(title: String)(indexingDocumentForm:Form[IndexingDocumentStub])
 @implicitField = @{ FieldConstructor(myPlainFieldConstructor.render) }
 
 @main(title = title){

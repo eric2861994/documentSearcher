@@ -30,7 +30,9 @@ GET         /experiment/result            controllers.Application.experimentResu
 GET         /experiment/result/*id        controllers.Application.experimentDetail(id)
 
 GET         /summary                      controllers.Application.summary
-POST         /summary                      controllers.Application.postSummary
+POST        /summary                      controllers.Application.postSummary
+
+POST         /relFeedInteractive           controllers.Application.relFeedInteractive
 
 # Map static resources from the /public folder to the /assets URL path
 GET         /assets/*file                 controllers.Assets.at(path="/public", file)

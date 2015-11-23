@@ -1,5 +1,5 @@
 @(title:String = "Result")(list:java.util.List[stbi.common.util.Pair[java.lang.Double,stbi.common.IndexedDocument]])
-
+@id={0};
 @main(title = title) {
     <table id="example" class="display" cellspacing="0" width="100%">
         <thead>
@@ -7,35 +7,60 @@
                 <th>Similarity</th>
                 <th>DocumentID</th>
                 <th>Title</th>
+                <th>Unspecified</th>
+                <th>Relevance</th>
+                <th>Not Relevance</th>
             </tr>
         </thead>
 
-        <tfoot>
-            <tr>
-                <th>Similarity</th>
-                <th>DocumentID</th>
-                <th>Title</th>
-            </tr>
-        </tfoot>
-
         <tbody>
-            @for(p <- list) {
+            @for((p,indexnumber) <- list.zipWithIndex) {
                 <tr>
                     <td>@p.first</td>
                     <td>@p.second.getId</td>
                     <td>@p.second.getTitle</td>
+                    <td><input type="radio" id="@p.second.getId" name="department_permission[@indexnumber]" value="unspecified" checked/></td>
+                    <td><input type="radio" id="@p.second.getId" name="department_permission[@indexnumber]" value="relevance" /></td>
+                    <td><input type="radio" id="@p.second.getId" name="department_permission[@indexnumber]" value="not_relevance" /></td>
                 </tr>
             }
         </tbody>
     </table>
+    <a class="btn btn-default" id="ajaxcall">Relevance</a><br/>
 } {
     <script type="text/javascript">
+        var mylist;
         $(document).ready(function() {
             $('#example').DataTable({
                 "paging":   true,
                 "ordering": true,
                 "info":     true,
-                "order": [[ 0, "asc" ]]
+                "order": [[ 0, "desc" ]]
+            });
+            var relevanceList = []
+            var irrelevanceList = []
+            $( "#ajaxcall" ).click(function() {
+                relevanceList = []
+                irrelevanceList = []
+                var oTable = $('#example').dataTable();
+                var rowcollection =  oTable.$('input[type="radio"]:checked', {"page": "all"});
+                rowcollection.each(function(index,elem){
+                    var checkbox_value = $(elem).val();
+                    var id = $(elem).attr('id');
+                    if (checkbox_value == 'relevance') {
+                        relevanceList.push(id)
+                    } else if (checkbox_value == 'not_relevance') {
+                        irrelevanceList.push(id)
+                    }
+                });
+                alert(relevanceList);
+                alert(irrelevanceList);
+                $.post("/relFeedInteractive", {
+                    relevantList:relevanceList,
+                    irrelevantList:irrelevanceList
+                },function(data, status){
+                    alert("Data: " + data + "\nStatus: " + status);
+                });
             });
         } );
     </script>
