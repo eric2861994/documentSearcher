@@ -14,6 +14,7 @@ import stbi.common.IndexedDocument;
 import stbi.common.Option;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
+import stbi.common.util.RelevanceFeedbackOption;
 import stbi.common.util.RelevanceFeedbackStatus;
 import views.html.*;
 
@@ -115,13 +116,14 @@ public class Application extends Controller {
         boolean dStemmer = interactiveSearchSettings.isUseStemmer();
 
         RelevanceFeedbackStatus dRelevanceFeedbackStatus = interactiveSearchSettings.getRelevanceFeedbackStatus();
+        RelevanceFeedbackOption dRelevanceFeedbackOption = interactiveSearchSettings.getRelevanceFeedbackOption();
         boolean dUseSameDocumentCollection = interactiveSearchSettings.isUseSameDocumentCollection();
         int dS = interactiveSearchSettings.getS();
         int dN = interactiveSearchSettings.getN();
         boolean dUseQueryExpansion = interactiveSearchSettings.isUseQueryExpansion();
 
         try {
-            appLogic.setSearchOption(new Option(tfType, dIdf, dNormalization, dStemmer, dRelevanceFeedbackStatus, dUseSameDocumentCollection, dS, dN, dUseQueryExpansion));
+            appLogic.setSearchOption(new Option(tfType, dIdf, dNormalization, dStemmer, dRelevanceFeedbackStatus, dRelevanceFeedbackOption, dUseSameDocumentCollection, dS, dN, dUseQueryExpansion));
             return redirect("/interactive");
 
         } catch (IOException e) {
@@ -178,6 +180,7 @@ public class Application extends Controller {
                     experimentalRetrievalStub.isUseNormalization(),
                     experimentalRetrievalStub.isUseStemmer(),
                     experimentalRetrievalStub.getRelevanceFeedbackStatus(),
+                    experimentalRetrievalStub.getRelevanceFeedbackOption(),
                     experimentalRetrievalStub.isUseSameDocumentCollection(),
                     experimentalRetrievalStub.getS(),
                     experimentalRetrievalStub.getN(),

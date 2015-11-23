@@ -11,7 +11,7 @@ public class RetrievalStub extends StopwordsStub {
     protected boolean useStemmer;
     protected boolean useStopwords;
     protected RelevanceFeedbackStatus relevanceFeedbackStatus;
-    protected RelevanceFeedbackOption relevanceFeedbackOption;
+    private RelevanceFeedbackOption relevanceFeedbackOption;
     protected boolean useSameDocumentCollection;
     protected int S;
     protected int N;
@@ -106,5 +106,13 @@ public class RetrievalStub extends StopwordsStub {
 
     public void setUseQueryExpansion(boolean useQueryExpansion) {
         this.useQueryExpansion = useQueryExpansion;
+    }
+
+    public RelevanceFeedbackOption getRelevanceFeedbackOption() {
+        return relevanceFeedbackOption;
+    }
+
+    public void setRelevanceFeedbackOption(RelevanceFeedbackOption relevanceFeedbackOption) {
+        this.relevanceFeedbackOption = relevanceFeedbackOption;
     }
 }
