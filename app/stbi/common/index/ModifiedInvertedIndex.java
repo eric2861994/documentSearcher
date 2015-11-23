@@ -4,6 +4,7 @@ import stbi.common.IndexedDocument;
 import stbi.common.term.Term;
 
 import java.io.Serializable;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -73,6 +74,20 @@ public class ModifiedInvertedIndex implements Index, Serializable {
 
     public  Map<Term, Map<Integer, Double>> getTermDocumentWeight(){
         return termDocumentWeight;
+    }
+
+    @Override
+    public Map<Term, Double> getDocumentTermVector(Integer docID) {
+        Map<Term, Double> documentVector = new HashMap<>();
+        for (Map.Entry<Term, Map<Integer, Double>> entry: termDocumentWeight.entrySet()) {
+            Map<Integer, Double> documentTermWeight = entry.getValue();
+
+            if (documentTermWeight.containsKey(docID)) { // jika term ini terkandung di document ini
+                documentVector.put(entry.getKey(), documentTermWeight.get(docID));
+            }
+        }
+
+        return documentVector;
     }
 
 }

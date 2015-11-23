@@ -20,8 +20,8 @@ public class Searcher {
         calculator = _calculator;
     }
 
-    public List<Pair<Double, Integer>> search(Index index, String query, Set<Term> stopwords, Calculator.TFType tfType,
-                                              boolean isUsingIdf, boolean isNormalized, boolean useStemmer) {
+    public Map<Term, Double> getQueryVector(Index index, String query, Set<Term> stopwords, Calculator.TFType tfType,
+                                            boolean useIDF, boolean useNormalize, boolean useStemmer) {
         // Make Term Stream from the query.
         StringTermStream stringTermStream = new StringTermStream(query, "\\W+");
         StopwordTermStream stopwordTermStream = new StopwordTermStream(stringTermStream, stopwords);
@@ -35,11 +35,17 @@ public class Searcher {
         TermFrequency termFrequency = new TermFrequency(termStream);
 
         Map<Term, Double> termsWeight = calculator.getTFValue(tfType, termFrequency);
-        if (isUsingIdf) addIdfToWeight(termsWeight, index);
-        if (isNormalized) normalizeTermsWeight(termsWeight);
+        if (useIDF) addIdfToWeight(termsWeight, index);
+        if (useNormalize) normalizeTermsWeight(termsWeight);
 
+        return termsWeight;
+    }
+
+    public List<Pair<Double, Integer>> search(Index index, Map<Term, Double> termsWeight) {
+        Set<Term> keySet = termsWeight.keySet();
+        Term[] terms = keySet.toArray(new Term[keySet.size()]);
         // Find the indexedDocuments that contain the query.
-        Integer[] indexDocIDs = index.getDocumentIDs(termFrequency.getTerms());
+        Integer[] indexDocIDs = index.getDocumentIDs(terms);
 
         // for each document we compute the similarity of it with query
         List<Pair<Double, Integer>> similarityDocIDList = new ArrayList<>();

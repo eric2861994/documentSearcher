@@ -3,6 +3,7 @@ package stbi.common.index;
 import stbi.common.IndexedDocument;
 import stbi.common.term.Term;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -47,4 +48,6 @@ public interface Index {
      * @return indexed document
      */
     IndexedDocument getIndexedDocument(int docID);
+
+    Map<Term, Double> getDocumentTermVector(Integer docID);
 }
