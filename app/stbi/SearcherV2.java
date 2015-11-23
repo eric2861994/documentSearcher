@@ -16,35 +16,24 @@ public class SearcherV2 {
     private final Index index;
     private final Searcher searcher;
 
-
-    private int documentsToPresent = 1;
-    private int reweightMethod = ROCCHIO;
-    private boolean doExpansion = true;
-
-
-    Map<Integer, Set<Integer>> relevanceJudgement;
-
     public SearcherV2(Index a_index, Searcher a_searcher) {
         index = a_index;
         searcher = a_searcher;
     }
 
-    public List<Pair<Double, Integer>> relevanceFeedbackExperiment(int queryID) {
-        Map<Term, Double> initialQuery = searcher.getQueryVector(index, "", null, null, false, false, false);
-        List<Pair<Double, Integer>> searchResult = searcher.search(null, null);
+    public Map<Term, Double> relevanceFeedback(
+            Map<Term, Double> initialQuery, List<Pair<Double, Integer>> searchResult, Set<Integer> relevantDocumentSet,
+            int documentsToPresent, int reweightMethod, boolean doExpansion) {
 
-        int toTake = Math.min(documentsToPresent, searchResult.size());
-        if (toTake > 0) {
-            List<Integer> topDocuments = takeTopDocuments(searchResult, toTake);
-            Set<Integer> relevantDocumentSet = relevanceJudgement.get(queryID);
+        List<Integer> topDocuments = takeTopDocuments(searchResult, documentsToPresent);
+        if (topDocuments.size() > 0) {
             List<Map<Term, Double>> relevantVectors = getDocumentVectors(topDocuments, relevantDocumentSet, true);
             List<Map<Term, Double>> irrelevantVectors = getDocumentVectors(topDocuments, relevantDocumentSet, false);
 
-            Map<Term, Double> reweightedQuery = reweightQuery(initialQuery, relevantVectors, irrelevantVectors);
-            return searcher.search(index, reweightedQuery);
+            return reweightQuery(initialQuery, relevantVectors, irrelevantVectors, reweightMethod, doExpansion);
 
         } else {
-            return searchResult;
+            return initialQuery;
         }
     }
 
@@ -64,8 +53,8 @@ public class SearcherV2 {
         return relevantVectors;
     }
 
-    private Map<Term, Double> reweightQuery(Map<Term, Double> initialQuery, List<Map<Term,Double>> relevantVectors,
-                                            List<Map<Term,Double>> irrelevantVectors) {
+    private Map<Term, Double> reweightQuery(Map<Term, Double> initialQuery, List<Map<Term, Double>> relevantVectors,
+                                            List<Map<Term, Double>> irrelevantVectors, int reweightMethod, boolean doExpansion) {
         switch (reweightMethod) {
             case ROCCHIO:
                 return RelevanceFeedbackUtils.rochioQueryReweighting(initialQuery, relevantVectors, irrelevantVectors, doExpansion);
@@ -78,23 +67,15 @@ public class SearcherV2 {
         return null;
     }
 
-    private List<Integer> takeTopDocuments(List<Pair<Double, Integer>> searchResult, int toTake) {
+    public List<Integer> takeTopDocuments(List<Pair<Double, Integer>> searchResult, int toTake) {
         List<Integer> result = new ArrayList<>();
-        for (int i = 0; i < toTake; i++) {
+        for (int i = 0; i < toTake && i < searchResult.size(); i++) {
             Pair<Double, Integer> searchEntry = searchResult.get(i);
 
             result.add(searchEntry.second);
         }
 
         return result;
-    }
-
-    public int getReweightMethod() {
-        return reweightMethod;
-    }
-
-    public void setReweightMethod(int reweightMethod) {
-        this.reweightMethod = reweightMethod;
     }
 
     public static final int ROCCHIO = 0, IDE = 1, DEC_HI = 2;

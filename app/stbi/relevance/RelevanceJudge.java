@@ -30,6 +30,7 @@ public class RelevanceJudge {
     private static final char QUERY_SECTION_QUERY_STRING = 'W';
 
     private List<Query> queryList;
+
     private Map<Integer, Set<Integer>> queryRelation;
 
     public RelevanceJudge(File queryFile, File queryRelationFile) throws IOException {
@@ -222,5 +223,9 @@ public class RelevanceJudge {
             }
             return precisionAccum / 10;
         }
+    }
+
+    public Map<Integer, Set<Integer>> getQueryRelation() {
+        return queryRelation;
     }
 }
