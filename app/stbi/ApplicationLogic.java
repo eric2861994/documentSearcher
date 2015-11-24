@@ -17,7 +17,6 @@ import stbi.common.index.ModifiedInvertedIndex;
 import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
-import stbi.common.util.RelevanceFeedbackStatus;
 import stbi.indexer.ModifiedInvertedIndexer;
 import stbi.indexer.RawDocument;
 import stbi.relevance.RelevanceJudge;
@@ -54,6 +53,7 @@ public class ApplicationLogic {
     private Index index;
     private Set<Term> stopwords;
     private List<ExperimentResult> experimentResult;
+    private Map<Term, Double> firstSearchQuery;
 
     private ApplicationLogic() {
         indexFile = Play.application().getFile(INDEX_FILE_PATH);
@@ -226,9 +226,49 @@ public class ApplicationLogic {
         }
 
         Option searchOption = getSearchOption();
-        Map<Term, Double> queryVectorSearcher = searcher.getQueryVector(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
+        firstSearchQuery = searcher.getQueryVector(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
                 searchOption.isUseNormalization(), searchOption.isUseStemmer());
-        return searcher.search(index, queryVectorSearcher);
+        return searcher.search(index, firstSearchQuery);
+    }
+
+    /**
+     * OUTPUT: query lama, query baru, hasil pencarian bar7
+     */
+    public RelevanceFeedbackDisplayVariables relevanceFeedback(List<Integer> relevantDocumentRealIDs, List<Integer> irrelevantDocumentRealIDs) {
+
+        List<Map<Term, Double>> relevantVectors = new ArrayList<>();
+        for (Integer realDocumentID: relevantDocumentRealIDs) {
+            relevantVectors.add(index.getDocumentTermVector(realDocumentID - 1));
+        }
+
+        List<Map<Term, Double>> irrelevantVectors = new ArrayList<>();
+        for (Integer realDocumentID: irrelevantDocumentRealIDs) {
+            relevantVectors.add(index.getDocumentTermVector(realDocumentID-1));
+        }
+
+        SearcherV2 searcherV2 = new SearcherV2(index, searcher);
+
+        Option searchOption = getSearchOption();
+
+        int reweightMethod = SearcherV2.ROCCHIO;
+        switch (searchOption.getRelevanceFeedbackOption()) {
+            case ROCCHIO:
+                reweightMethod = SearcherV2.ROCCHIO;
+                break;
+            case IDE_REGULER:
+                reweightMethod = SearcherV2.IDE;
+                break;
+            case IDE_DEC_HI:
+                reweightMethod = SearcherV2.DEC_HI;
+                break;
+        }
+
+        RelevanceFeedbackDisplayVariables result = new RelevanceFeedbackDisplayVariables();
+        result.queryLama = firstSearchQuery;
+        result.queryBaru = searcherV2.relevanceFeedbackV2(firstSearchQuery, relevantVectors, irrelevantVectors, reweightMethod, searchOption.isUseQueryExpansion());
+        result.hasilPencarianBaru = searcher.search(index, result.queryBaru);
+
+        return result;
     }
 
     public void saveIndexingSettings(IndexingDocumentStub indexingDocumentStub) throws IOException {
