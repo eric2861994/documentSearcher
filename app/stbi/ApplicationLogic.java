@@ -343,7 +343,10 @@ public class ApplicationLogic {
 
                 case USE_RELEVANCE_FEEDBACK: {
                     for (int i = experimentOption.getS(); i < firstSearchResult.size(); i++) {
-                        filterIDList.add(firstSearchResult.get(i).second);
+                        int myID = firstSearchResult.get(i).second;
+                        IndexedDocument indexedDocument = index.getIndexedDocument(myID);
+                        int realID = indexedDocument.getId();
+                        filterIDList.add(realID);
                     }
 
                     Map<Integer, Set<Integer>> relevanceJudgement = relevanceJudge.getQueryRelation();
@@ -395,6 +398,13 @@ public class ApplicationLogic {
                 eval = relevanceJudge.evaluate(query.id, relevantDocuments);
             } else {
                 eval = relevanceJudge.evaluate(query.id, relevantDocuments, filterIDList);
+
+                List<SearchResultEntry> tempResult = new ArrayList<>();
+                for (SearchResultEntry searchResultEntry: searchResult) {
+                    if (filterIDList.contains(searchResultEntry.getDocumentId())) {
+                        tempResult.add(searchResultEntry);
+                    }
+                }
             }
 
             ExperimentResult experResult = new ExperimentResult(query.queryString,
