@@ -228,6 +228,17 @@ public class ApplicationLogic {
         return index.getIndexedDocument(docID);
     }
 
+    public List<Pair<Double, Integer>> searchQuery(String query) throws IndexedFileException {
+        if (stopwords == null || index == null) {
+            throw new IndexedFileException();
+        }
+
+        Option searchOption = getSearchOption();
+        firstSearchQuery = searcher.getQueryVector(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
+                searchOption.isUseNormalization(), searchOption.isUseStemmer());
+        return searcher.search(index, firstSearchQuery);
+    }
+
     /**
      * OUTPUT: query lama, query baru, hasil pencarian baru
      */
