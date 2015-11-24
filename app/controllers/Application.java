@@ -146,21 +146,22 @@ public class Application extends Controller {
         InteractiveRetrievalStub interactiveRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
 
         String query = interactiveRetrievalStub.getQuery();
-        List<Pair<Double, Integer>> similarityDocIDList = null;
+        List<Pair<Double, Integer>> firstSearchResult = null;
         try {
-            similarityDocIDList = appLogic.searchQuery(query);
-            List<Pair<Double, IndexedDocument>> display = new ArrayList<>();
-            for (int resIdx = 0; resIdx < similarityDocIDList.size(); resIdx++) {
-                Pair<Double, Integer> similarityDocID = similarityDocIDList.get(resIdx);
+            firstSearchResult = appLogic.searchQuery(query);
 
-                IndexedDocument document = appLogic.getIndexedDocument(similarityDocID.second);
-                display.add(new Pair<>(similarityDocID.first, document));
+            List<Pair<Double, IndexedDocument>> displayableSearchResult = new ArrayList<>();
+            for (int resIdx = 0; resIdx < firstSearchResult.size(); resIdx++) {
+                Pair<Double, Integer> firstSearchEntry = firstSearchResult.get(resIdx);
+
+                IndexedDocument document = appLogic.getIndexedDocument(firstSearchEntry.second);
+                displayableSearchResult.add(new Pair<>(firstSearchEntry.first, document));
             }
 
             if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK) {
-                return ok(interactivesearchnorelevancefeedback.render("RESULT", display));
+                return ok(interactivesearchnorelevancefeedback.render("RESULT", displayableSearchResult));
             } else {
-                return ok(interactivesearch.render("RESULT", display));
+                return ok(interactivesearch.render("RESULT", displayableSearchResult));
             }
 
         } catch (IndexedFileException e) {
