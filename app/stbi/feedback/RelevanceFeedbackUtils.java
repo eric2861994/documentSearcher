@@ -154,7 +154,7 @@ public class RelevanceFeedbackUtils {
                                                            boolean doExpansion) {
         Map<Term,Double> resultVector = new HashMap<>();
 
-        Set<Term> resultTerms = queryVector.keySet();
+        Set<Term> resultTerms = new HashSet<Term>(queryVector.keySet());
         if (doExpansion) {
             resultTerms.addAll(relevantVector.keySet());
         }

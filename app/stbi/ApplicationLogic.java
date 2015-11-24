@@ -96,6 +96,7 @@ public class ApplicationLogic {
         experimentalRetrievalStub.setUseNormalization(option.isUseNormalization());
         experimentalRetrievalStub.setUseStemmer(option.isUseStemmer());
         experimentalRetrievalStub.setRelevanceFeedbackStatus(option.getRelevanceFeedbackStatus());
+        experimentalRetrievalStub.setRelevanceFeedbackOption(option.getRelevanceFeedbackOption());
         experimentalRetrievalStub.setUseSameDocumentCollection(option.isUseSameDocumentCollection());
         experimentalRetrievalStub.setS(option.getS());
         experimentalRetrievalStub.setN(option.getN());
