@@ -37,6 +37,13 @@ public class SearcherV2 {
         }
     }
 
+    public Map<Term, Double> relevanceFeedbackV2(
+            Map<Term, Double> initialQuery, List<Map<Term, Double>> relevantVectors,
+            List<Map<Term, Double>> irrelevantVectors, int reweightMethod, boolean doExpansion) {
+
+        return reweightQuery(initialQuery, relevantVectors, irrelevantVectors, reweightMethod, doExpansion);
+    }
+
     private List<Map<Term, Double>> getDocumentVectors(List<Integer> topDocuments, Set<Integer> relevantDocumentSet, boolean value) {
         List<Map<Term, Double>> relevantVectors = new ArrayList<>();
 

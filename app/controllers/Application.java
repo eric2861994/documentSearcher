@@ -151,12 +151,12 @@ public class Application extends Controller {
                 IndexedDocument document = appLogic.getIndexedDocument(similarityDocID.second);
                 display.add(new Pair<>(similarityDocID.first, document));
             }
+
             if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK) {
                 return ok(interactivesearchnorelevancefeedback.render("RESULT", display));
             } else {
                 return ok(interactivesearch.render("RESULT", display));
             }
-
 
         } catch (IndexedFileException e) {
             flash("error", "The file has not been indexed yet ");
@@ -241,6 +241,8 @@ public class Application extends Controller {
     public static Result relFeedInteractive() {
         Form<RelevanceFeedbackInteractiveStub> relevanceFeedbackInteractiveStubForm = Form.form(RelevanceFeedbackInteractiveStub.class);
         RelevanceFeedbackInteractiveStub relevanceFeedbackInteractiveStub = relevanceFeedbackInteractiveStubForm.bindFromRequest().get();
+
+        appLogic.relevanceFeedback(relevanceFeedbackInteractiveStub.getRelevantList(), relevanceFeedbackInteractiveStub.getIrrelevantList());
         Pair<Double, IndexedDocument> display = new Pair<>(1.0, new IndexedDocument(231, "judul", "penulis"));
 
         RelevanceFeedbackInteractiveResponse relevanceFeedbackInteractiveResponse = new RelevanceFeedbackInteractiveResponse(display);
