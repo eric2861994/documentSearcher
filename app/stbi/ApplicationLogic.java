@@ -342,6 +342,11 @@ public class ApplicationLogic {
                 }
 
                 case USE_RELEVANCE_FEEDBACK: {
+                    Set<Integer> liarGame = new HashSet<>();
+                    for (int i = 0; i < experimentOption.getS() && i < firstSearchResult.size(); i++) {
+                        liarGame.add(firstSearchResult.get(i).second);
+                    }
+
                     for (int i = experimentOption.getS(); i < firstSearchResult.size(); i++) {
                         int myID = firstSearchResult.get(i).second;
                         IndexedDocument indexedDocument = index.getIndexedDocument(myID);
@@ -369,6 +374,17 @@ public class ApplicationLogic {
                     secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
                             experimentOption.getS(), reweightMethod, experimentOption.isUseQueryExpansion());
                     documentSimilarityList = searcher.search(index, secondQuery);
+
+                    if (!experimentOption.isUseSameDocumentCollection()) {
+                        List<Pair<Double,Integer>> temporaryDocumentSimilarityList = new ArrayList<>();
+
+                        for (Pair<Double,Integer> wow : documentSimilarityList) {
+                            if (!liarGame.contains(wow.second)) {
+                                temporaryDocumentSimilarityList.add(wow);
+                            }
+                        }
+                        documentSimilarityList = temporaryDocumentSimilarityList;
+                    }
                     break;
                 }
 
@@ -398,13 +414,6 @@ public class ApplicationLogic {
                 eval = relevanceJudge.evaluate(query.id, relevantDocuments);
             } else {
                 eval = relevanceJudge.evaluate(query.id, relevantDocuments, filterIDList);
-
-                List<SearchResultEntry> tempResult = new ArrayList<>();
-                for (SearchResultEntry searchResultEntry: searchResult) {
-                    if (filterIDList.contains(searchResultEntry.getDocumentId())) {
-                        tempResult.add(searchResultEntry);
-                    }
-                }
             }
 
             ExperimentResult experResult = new ExperimentResult(query.queryString,
