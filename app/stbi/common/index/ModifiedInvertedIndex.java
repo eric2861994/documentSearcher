@@ -17,10 +17,16 @@ import java.util.Set;
 public class ModifiedInvertedIndex implements Index, Serializable {
     private final Map<Term, Map<Integer, Double>> termDocumentWeight;
     private final IndexedDocument[] indexedDocuments;
+    private final Map<Integer, Integer> realIdToMyId;
 
     public ModifiedInvertedIndex(Map<Term, Map<Integer, Double>> _termDocumentWeight, IndexedDocument[] _indexedDocuments) {
         termDocumentWeight = _termDocumentWeight;
         indexedDocuments = _indexedDocuments;
+
+        realIdToMyId = new HashMap<>();
+        for (int i = 0; i < _indexedDocuments.length; i++) {
+            realIdToMyId.put(_indexedDocuments[i].getId(), i);
+        }
     }
 
     @Override
@@ -72,14 +78,14 @@ public class ModifiedInvertedIndex implements Index, Serializable {
         return indexedDocuments[docID];
     }
 
-    public  Map<Term, Map<Integer, Double>> getTermDocumentWeight(){
+    public Map<Term, Map<Integer, Double>> getTermDocumentWeight() {
         return termDocumentWeight;
     }
 
     @Override
     public Map<Term, Double> getDocumentTermVector(Integer docID) {
         Map<Term, Double> documentVector = new HashMap<>();
-        for (Map.Entry<Term, Map<Integer, Double>> entry: termDocumentWeight.entrySet()) {
+        for (Map.Entry<Term, Map<Integer, Double>> entry : termDocumentWeight.entrySet()) {
             Map<Integer, Double> documentTermWeight = entry.getValue();
 
             if (documentTermWeight.containsKey(docID)) { // jika term ini terkandung di document ini
@@ -88,6 +94,12 @@ public class ModifiedInvertedIndex implements Index, Serializable {
         }
 
         return documentVector;
+    }
+
+    @Override
+    public Map<Term, Double> getDocumentTermVectorUsingRealId(Integer docID) {
+        Integer myId = realIdToMyId.get(docID);
+        return getDocumentTermVector(myId);
     }
 
 }

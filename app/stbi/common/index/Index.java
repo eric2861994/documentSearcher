@@ -50,4 +50,6 @@ public interface Index {
     IndexedDocument getIndexedDocument(int docID);
 
     Map<Term, Double> getDocumentTermVector(Integer docID);
+
+    Map<Term, Double> getDocumentTermVectorUsingRealId(Integer docID);
 }

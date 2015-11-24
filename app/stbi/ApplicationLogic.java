@@ -217,43 +217,34 @@ public class ApplicationLogic {
         return option;
     }
 
+    // TODO up from here
+
     public IndexedDocument getIndexedDocument(int docID) {
         return index.getIndexedDocument(docID);
     }
 
-    public List<Pair<Double, Integer>> searchQuery(String query) throws IndexedFileException {
-        if (stopwords == null || index == null) {
-            throw new IndexedFileException();
-        }
-
-        Option searchOption = getSearchOption();
-        firstSearchQuery = searcher.getQueryVector(index, query, stopwords, searchOption.getTfType(), searchOption.isUseIDF(),
-                searchOption.isUseNormalization(), searchOption.isUseStemmer());
-        return searcher.search(index, firstSearchQuery);
-    }
-
     /**
-     * OUTPUT: query lama, query baru, hasil pencarian bar7
+     * OUTPUT: query lama, query baru, hasil pencarian baru
      */
     public RelevanceFeedbackDisplayVariables relevanceFeedback(List<Integer> relevantDocumentRealIDs, List<Integer> irrelevantDocumentRealIDs) {
-
         List<Map<Term, Double>> relevantVectors = new ArrayList<>();
         for (Integer realDocumentID : relevantDocumentRealIDs) {
-            relevantVectors.add(index.getDocumentTermVector(realDocumentID - 1));
+            relevantVectors.add(index.getDocumentTermVectorUsingRealId(realDocumentID ));
         }
 
         List<Map<Term, Double>> irrelevantVectors = new ArrayList<>();
         for (Integer realDocumentID : irrelevantDocumentRealIDs) {
-            relevantVectors.add(index.getDocumentTermVector(realDocumentID - 1));
+            relevantVectors.add(index.getDocumentTermVectorUsingRealId(realDocumentID));
         }
 
+        // harus dibuat disini karena index dapat berubah
         SearcherV2 searcherV2 = new SearcherV2(index, searcher);
 
         Option searchOption = getSearchOption();
-
         int reweightMethod = getSearcherV2ReweightMethod(searchOption.getRelevanceFeedbackOption());
 
         RelevanceFeedbackDisplayVariables result = new RelevanceFeedbackDisplayVariables();
+
         result.queryLama = firstSearchQuery;
         result.queryBaru = searcherV2.relevanceFeedbackV2(firstSearchQuery, relevantVectors, irrelevantVectors, reweightMethod, searchOption.isUseQueryExpansion());
         result.hasilPencarianBaru = searcher.search(index, result.queryBaru);
@@ -267,8 +258,9 @@ public class ApplicationLogic {
 
     public void saveStopwordsSetting(StopwordsStub stopwordsStub) throws IOException {
         File stopwordFile = new File(stopwordsStub.getStopwordLocation());
-        stopwords = loader.loadStopwords(stopwordFile);
         new ObjectMapper().writeValue(stopwordSettingFile, stopwordsStub);
+
+        stopwords = loader.loadStopwords(stopwordFile);
     }
 
     public void performExperiment(String queryPath, String relevanceJudgementPath) throws IOException {
