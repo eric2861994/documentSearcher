@@ -3,12 +3,14 @@ package controllers;
 import formstubs.*;
 import play.Play;
 import play.data.Form;
+import play.libs.Json;
 import play.mvc.Controller;
 import play.mvc.Result;
 import stbi.ApplicationLogic;
 import stbi.IndexedFileException;
 import stbi.common.IndexedDocument;
 import stbi.common.Option;
+import stbi.common.index.Index;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
 import stbi.common.util.RelevanceFeedbackOption;
@@ -239,7 +241,26 @@ public class Application extends Controller {
     public static Result relFeedInteractive() {
         Form<RelevanceFeedbackInteractiveStub> relevanceFeedbackInteractiveStubForm = Form.form(RelevanceFeedbackInteractiveStub.class);
         RelevanceFeedbackInteractiveStub relevanceFeedbackInteractiveStub = relevanceFeedbackInteractiveStubForm.bindFromRequest().get();
+        Pair<Double, IndexedDocument> display = new Pair<>(1.0, new IndexedDocument(231, "judul", "penulis"));
+
+        RelevanceFeedbackInteractiveResponse relevanceFeedbackInteractiveResponse = new RelevanceFeedbackInteractiveResponse(display);
+        List<RelevanceFeedbackInteractiveResponse> relevanceFeedbackInteractiveResponseList = new ArrayList<>();
+        relevanceFeedbackInteractiveResponseList.add(relevanceFeedbackInteractiveResponse);
+
+        //convert to json array
+        List<List<String>> retval = new ArrayList<>();
+        for (RelevanceFeedbackInteractiveResponse it : relevanceFeedbackInteractiveResponseList) {
+            List<String> tmp = new ArrayList<>();
+            tmp.add(String.valueOf(it.getSimilarity()));
+            tmp.add(String.valueOf(it.getDocumentId()));
+            tmp.add(it.getTitle());
+            retval.add(tmp);
+        }
+
+//        relevanceFeedbackInteractiveStub.getIrrelevantList() mungkin null
+//        relevanceFeedbackInteractiveStub.getRelevantList() mungkin null
 //        return ok(interactivesearchnorelevancefeedback.render("RESULT", display))
-        return play.mvc.Results.TODO;
+
+        return ok(Json.toJson(retval));
     }
 }

@@ -26,6 +26,7 @@
             }
         </tbody>
     </table>
+    <table id="relFeedback" class="display" width="100%"></table>
     <a class="btn btn-default" id="ajaxcall">Relevance</a><br/>
 } {
     <script type="text/javascript">
@@ -53,13 +54,18 @@
                         irrelevanceList.push(id)
                     }
                 });
-                alert(relevanceList);
-                alert(irrelevanceList);
                 $.post("/relFeedInteractive", {
                     relevantList:relevanceList,
                     irrelevantList:irrelevanceList
                 },function(data, status){
-                    alert("Data: " + data + "\nStatus: " + status);
+                    $('#relFeedback').DataTable( {
+                        data: data,
+                        columns: [
+                            { title: "Similarity" },
+                            { title: "Document ID" },
+                            { title: "Title" }
+                        ]
+                    } );
                 });
             });
         } );
