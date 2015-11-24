@@ -201,6 +201,8 @@ public class ApplicationLogic {
         return option;
     }
 
+    // TODO up from here
+
     public void setExperimentOption(Option experimentOption) throws IOException {
         new ObjectMapper().writeValue(experimentalRetrievalQueryFile, experimentOption);
     }
@@ -222,8 +224,6 @@ public class ApplicationLogic {
         return option;
     }
 
-    // TODO up from here
-
     public IndexedDocument getIndexedDocument(int docID) {
         return index.getIndexedDocument(docID);
     }
@@ -243,14 +243,19 @@ public class ApplicationLogic {
      * OUTPUT: query lama, query baru, hasil pencarian baru
      */
     public RelevanceFeedbackDisplayVariables relevanceFeedback(List<Integer> relevantDocumentRealIDs, List<Integer> irrelevantDocumentRealIDs) {
+        // documents annoated by user, real id used here
+        Set<Integer> annotatedDocumentID = new HashSet<>();
+
         List<Map<Term, Double>> relevantVectors = new ArrayList<>();
         for (Integer realDocumentID : relevantDocumentRealIDs) {
-            relevantVectors.add(index.getDocumentTermVectorUsingRealId(realDocumentID ));
+            relevantVectors.add(index.getDocumentTermVectorUsingRealId(realDocumentID));
+            annotatedDocumentID.add(realDocumentID);
         }
 
         List<Map<Term, Double>> irrelevantVectors = new ArrayList<>();
         for (Integer realDocumentID : irrelevantDocumentRealIDs) {
-            relevantVectors.add(index.getDocumentTermVectorUsingRealId(realDocumentID));
+            irrelevantVectors.add(index.getDocumentTermVectorUsingRealId(realDocumentID));
+            annotatedDocumentID.add(realDocumentID);
         }
 
         // harus dibuat disini karena index dapat berubah
@@ -263,7 +268,21 @@ public class ApplicationLogic {
 
         result.queryLama = firstSearchQuery;
         result.queryBaru = searcherV2.relevanceFeedbackV2(firstSearchQuery, relevantVectors, irrelevantVectors, reweightMethod, searchOption.isUseQueryExpansion());
-        result.hasilPencarianBaru = searcher.search(index, result.queryBaru);
+
+
+        List<Pair<Double, Integer>> secondSearchResult = searcher.search(index, result.queryBaru);
+        List<Pair<Double, Integer>> finalSearchResult = new ArrayList<>();
+        for (Pair<Double, Integer> searchResult: secondSearchResult) {
+            int myID = searchResult.second;
+            IndexedDocument indexedDocument = index.getIndexedDocument(myID);
+            int realID = indexedDocument.getId();
+
+            if (! annotatedDocumentID.contains(realID)) {
+                finalSearchResult.add(searchResult);
+            }
+        }
+
+        result.hasilPencarianBaru = finalSearchResult;
 
         return result;
     }
@@ -286,14 +305,6 @@ public class ApplicationLogic {
         );
 
         Option experimentOption = getExperimentOption();
-        File file = new File(experimentOption.getTfType() + "-" + experimentOption.isUseIDF() + "-" +
-                experimentOption.isUseNormalization() + "-" + experimentOption.isUseStemmer() + ".csv");
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-
-        FileWriter writer = new FileWriter(file);
-        writer.write("");
 
         // get experiment queries
         List<RelevanceJudge.Query> testQueries = relevanceJudge.getQueryList();
@@ -303,6 +314,10 @@ public class ApplicationLogic {
 
         // experiment result is first stored here before stored to field variable
         List<ExperimentResult> experimentResultList = new ArrayList<>();
+
+        double sumRecall = 0;
+        double sumPrecision = 0;
+        double sumNonInterpolatedAveragePrecision = 0;
 
         for (RelevanceJudge.Query query : testQueries) {
             Map<Term, Double> initialQuery = searcher.getQueryVector(index, query.queryString, stopwords,
@@ -343,10 +358,10 @@ public class ApplicationLogic {
                     }
 
                     // fill filterIDList with real IDs of document that can be judged
-                    for (int i = experimentOption.getS(); i < firstSearchResult.size(); i++) {
-                        int myID = firstSearchResult.get(i).second;
+                    for (Integer myID: myIDOfDocumentsSeen) {
                         IndexedDocument indexedDocument = index.getIndexedDocument(myID);
                         int realID = indexedDocument.getId();
+
                         filterIDList.add(realID);
                     }
 
@@ -418,11 +433,17 @@ public class ApplicationLogic {
             experimentResultList.add(experResult);
 
             // writing table to file
-            String line = eval.recall + "," + eval.precision + "," + eval.nonInterpolatedPrecision + "\n";
-            writer.append(line);
+            sumRecall += eval.recall;
+            sumPrecision += eval.precision;
+            sumNonInterpolatedAveragePrecision += eval.nonInterpolatedPrecision;
         }
 
-        writer.close();
+        int querySize = testQueries.size();
+        if (querySize > 0) {
+            System.out.println("Average Recall = " + sumRecall/querySize +
+                    "\nAverage Precision = " + sumPrecision/querySize +
+                    "\nAverage Non-Interpolated Average Precision = " + sumNonInterpolatedAveragePrecision/querySize);
+        }
 
         experimentResult = experimentResultList;
     }
