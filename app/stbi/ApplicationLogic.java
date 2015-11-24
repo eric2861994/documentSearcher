@@ -18,6 +18,7 @@ import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
 import stbi.common.util.RelevanceFeedbackOption;
+import stbi.common.util.RelevanceFeedbackStatus;
 import stbi.indexer.ModifiedInvertedIndexer;
 import stbi.indexer.RawDocument;
 import stbi.relevance.RelevanceJudge;
@@ -40,6 +41,7 @@ public class ApplicationLogic {
 
 
     private static final String INDEX_FILE_PATH = "res/index.idx";
+    private static final ApplicationLogic oneInstance = new ApplicationLogic();
     private final Loader loader = new Loader();
     private final Calculator calculator = new Calculator();
     private final ModifiedInvertedIndexer modifiedInvertedIndexer = new ModifiedInvertedIndexer(calculator);
@@ -50,7 +52,6 @@ public class ApplicationLogic {
     private final File stopwordSettingFile;
     private final File interactiveSearchSettings;
     private final File experimentalRetrievalQueryFile;
-
     private Index index;
     private Set<Term> stopwords;
     private List<ExperimentResult> experimentResult;
@@ -88,6 +89,10 @@ public class ApplicationLogic {
         }
     }
 
+    public static ApplicationLogic getInstance() {
+        return oneInstance;
+    }
+
     public ExperimentalRetrievalStub getExperimentSettings() {
         ExperimentalRetrievalStub experimentalRetrievalStub = new ExperimentalRetrievalStub();
         Option option = getExperimentOption();
@@ -103,7 +108,6 @@ public class ApplicationLogic {
         experimentalRetrievalStub.setUseQueryExpansion(option.isUseQueryExpansion());
         return experimentalRetrievalStub;
     }
-
 
     public void indexDocuments(File documentsFile, Calculator.TFType tfType, boolean useIDF,
                                boolean useNormalization, boolean useStemmer) throws IOException {
@@ -181,9 +185,7 @@ public class ApplicationLogic {
         return interactiveRetrievalStub;
     }
 
-    public void setSearchOption(Option searchOption) throws IOException {
-        new ObjectMapper().writeValue(interactiveSearchSettings, searchOption);
-    }
+    // TODO up from here
 
     public Option getSearchOption() {
         Option option = new Option();
@@ -202,10 +204,8 @@ public class ApplicationLogic {
         return option;
     }
 
-    // TODO up from here
-
-    public void setExperimentOption(Option experimentOption) throws IOException {
-        new ObjectMapper().writeValue(experimentalRetrievalQueryFile, experimentOption);
+    public void setSearchOption(Option searchOption) throws IOException {
+        new ObjectMapper().writeValue(interactiveSearchSettings, searchOption);
     }
 
     public Option getExperimentOption() {
@@ -223,6 +223,10 @@ public class ApplicationLogic {
         }
 
         return option;
+    }
+
+    public void setExperimentOption(Option experimentOption) throws IOException {
+        new ObjectMapper().writeValue(experimentalRetrievalQueryFile, experimentOption);
     }
 
     public IndexedDocument getIndexedDocument(int docID) {
@@ -441,9 +445,157 @@ public class ApplicationLogic {
 
         int querySize = testQueries.size();
         if (querySize > 0) {
-            System.out.println("Average Recall = " + sumRecall/querySize +
-                    "\nAverage Precision = " + sumPrecision/querySize +
-                    "\nAverage Non-Interpolated Average Precision = " + sumNonInterpolatedAveragePrecision/querySize);
+            System.out.println("Average Recall = " + sumRecall / querySize +
+                    "\nAverage Precision = " + sumPrecision / querySize +
+                    "\nAverage Non-Interpolated Average Precision = " + sumNonInterpolatedAveragePrecision / querySize);
+        }
+
+        experimentResult = experimentResultList;
+    }
+
+    public void performExperiment(String queryPath, String relevanceJudgementPath, PrintWriter writer) throws IOException {
+        RelevanceJudge relevanceJudge = new RelevanceJudge(
+                Play.application().getFile(queryPath),
+                Play.application().getFile(relevanceJudgementPath)
+        );
+
+        Option experimentOption = getExperimentOption();
+
+        // get experiment queries
+        List<RelevanceJudge.Query> testQueries = relevanceJudge.getQueryList();
+
+        // helper class, forced to declare when we need to use because index might change anytime.
+        SearcherV2 searcherV2 = new SearcherV2(index, searcher);
+
+        // experiment result is first stored here before stored to field variable
+        List<ExperimentResult> experimentResultList = new ArrayList<>();
+
+        double sumRecall = 0;
+        double sumPrecision = 0;
+        double sumNonInterpolatedAveragePrecision = 0;
+
+        for (RelevanceJudge.Query query : testQueries) {
+            Map<Term, Double> initialQuery = searcher.getQueryVector(index, query.queryString, stopwords,
+                    experimentOption.getTfType(), experimentOption.isUseIDF(), experimentOption.isUseNormalization(),
+                    experimentOption.isUseStemmer());
+            List<Pair<Double, Integer>> firstSearchResult = searcher.search(index, initialQuery);
+
+            List<Integer> filterIDList = new ArrayList<>(); // required to call kayu's result evaluation
+            List<Pair<Double, Integer>> documentSimilarityList; // the result of second query
+            Map<Term, Double> secondQuery = null;
+            switch (experimentOption.getRelevanceFeedbackStatus()) {
+                case NO_RELEVANCE_FEEDBACK:
+                    documentSimilarityList = firstSearchResult; // the second query is the same as first query
+                    break;
+
+                case PSEUDO_RELEVANCE_FEEDBACK: {
+                    // take the N top documents as relevant document list
+                    List<Integer> relevantDocumentList = searcherV2.takeTopDocuments(firstSearchResult, experimentOption.getN());
+
+                    Set<Integer> relevantDocumentSet = new HashSet<>(); // should contain real id
+                    for (Integer myID : relevantDocumentList) {
+                        IndexedDocument indexedDocument = index.getIndexedDocument(myID);
+                        int realID = indexedDocument.getId();
+                        relevantDocumentSet.add(realID);
+                    }
+
+                    int reweightMethod = getSearcherV2ReweightMethod(experimentOption.getRelevanceFeedbackOption());
+                    secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
+                            experimentOption.getN(), reweightMethod, experimentOption.isUseQueryExpansion());
+                    documentSimilarityList = searcher.search(index, secondQuery);
+                    break;
+                }
+
+                case USE_RELEVANCE_FEEDBACK: {
+                    Set<Integer> myIDOfDocumentsSeen = new HashSet<>();
+                    for (int i = 0; i < experimentOption.getS() && i < firstSearchResult.size(); i++) {
+                        myIDOfDocumentsSeen.add(firstSearchResult.get(i).second);
+                    }
+
+                    // fill filterIDList with real IDs of document that can be judged
+                    for (Integer myID : myIDOfDocumentsSeen) {
+                        IndexedDocument indexedDocument = index.getIndexedDocument(myID);
+                        int realID = indexedDocument.getId();
+
+                        filterIDList.add(realID);
+                    }
+
+                    Map<Integer, Set<Integer>> relevanceJudgement = relevanceJudge.getQueryRelation();
+                    Set<Integer> relevantDocumentSet = relevanceJudgement.get(query.id);
+                    if (relevantDocumentSet == null) {
+                        relevantDocumentSet = new HashSet<>();
+                    }
+
+                    int reweightMethod = getSearcherV2ReweightMethod(experimentOption.getRelevanceFeedbackOption());
+                    secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
+                            experimentOption.getS(), reweightMethod, experimentOption.isUseQueryExpansion());
+                    documentSimilarityList = searcher.search(index, secondQuery);
+
+                    // if we are not allowed to use the same document collection
+                    if (!experimentOption.isUseSameDocumentCollection()) {
+                        List<Pair<Double, Integer>> temporaryDocumentSimilarityList = new ArrayList<>();
+
+                        // take only unseen result
+                        for (Pair<Double, Integer> searchResult : documentSimilarityList) {
+                            if (!myIDOfDocumentsSeen.contains(searchResult.second)) {
+                                temporaryDocumentSimilarityList.add(searchResult);
+                            }
+                        }
+
+                        documentSimilarityList = temporaryDocumentSimilarityList;
+                    }
+                    break;
+                }
+
+                default:
+                    // this should never happen
+                    documentSimilarityList = new ArrayList<>();
+                    break;
+            }
+
+            // get all real id of search result, as it is needed in relevanceJudge.evaluate
+            List<Integer> relevantDocuments = new ArrayList<>();
+            for (int i = 0; i < documentSimilarityList.size(); i++) {
+                Pair<Double, Integer> mSearchResult = documentSimilarityList.get(i);
+
+                int docID = index.getIndexedDocument(mSearchResult.second).getId();
+
+                relevantDocuments.add(docID);
+            }
+
+            // displayable result of our searching
+            List<SearchResultEntry> searchResult = new ArrayList<>();
+            for (int i = 0; i < documentSimilarityList.size(); i++) {
+                Pair<Double, Integer> mSearchResult = documentSimilarityList.get(i);
+
+                searchResult.add(new SearchResultEntry(
+                        i + 1,
+                        mSearchResult.first,
+                        index.getIndexedDocument(mSearchResult.second)
+                ));
+            }
+
+            // evaluate a query
+            RelevanceJudge.Evaluation eval;
+            if (experimentOption.isUseSameDocumentCollection()) {
+                eval = relevanceJudge.evaluate(query.id, relevantDocuments);
+            } else {
+                eval = relevanceJudge.evaluate(query.id, relevantDocuments, filterIDList);
+            }
+
+            ExperimentResult experResult = new ExperimentResult(query.queryString, (double) eval.precision,
+                    (double) eval.recall, (double) eval.nonInterpolatedPrecision, searchResult, initialQuery, secondQuery);
+            experimentResultList.add(experResult);
+
+            // writing table to file
+            sumRecall += eval.recall;
+            sumPrecision += eval.precision;
+            sumNonInterpolatedAveragePrecision += eval.nonInterpolatedPrecision;
+        }
+
+        int querySize = testQueries.size();
+        if (querySize > 0) {
+            writer.printf(",%f,%f,%f", sumRecall / querySize, sumPrecision / querySize, sumNonInterpolatedAveragePrecision / querySize);
         }
 
         experimentResult = experimentResultList;
@@ -472,12 +624,6 @@ public class ApplicationLogic {
 
     public ExperimentResult getExperimentResult(int idx) {
         return experimentResult.get(idx);
-    }
-
-    private static final ApplicationLogic oneInstance = new ApplicationLogic();
-
-    public static ApplicationLogic getInstance() {
-        return oneInstance;
     }
 
     public void writeSummary() throws IOException {
@@ -566,6 +712,70 @@ public class ApplicationLogic {
                         }
 
 
+                    }
+                }
+            }
+        }
+
+        writer.close();
+    }
+
+    public void writeRelevanceFeedbackSummary() throws IOException {
+        // START OF SETTING
+        // Ubah settingan untuk 2 jenis Data dan Stemming atau tidak
+        String queryPath = "dataset/ADI/query.text";
+        String relevanceJudgementPath = "dataset/ADI/qrels.text";
+        String documentLocation = "dataset/ADI/adi.all";
+        Calculator.TFType tfType = Calculator.TFType.RAW_TF;
+        boolean useIdf = false;
+        boolean useStemming = false;
+        boolean useNormalization = false;
+        int S = 5;
+        int N = 5;
+        // END OF SETTING
+
+        // Relevance Judgement
+        RelevanceJudge relevanceJudge = new RelevanceJudge(
+                new File(queryPath),
+                new File(relevanceJudgementPath));
+
+        // Get experiment queries
+        List<RelevanceJudge.Query> testQueries = relevanceJudge.getQueryList();
+
+        File file = new File("relevanceSummary.csv");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+
+        // Indexing
+        this.indexDocuments(new File(documentLocation),
+                tfType, useIdf, useNormalization, useStemming);
+
+        PrintWriter writer = new PrintWriter(file);
+
+        writer.print("\"Relevance Feedback Type\",\"Use Pseudo\",\"Use Expansion\",\"Use Previous Result\"," +
+                "\"Precision Avg\",\"Recall Avg\",\"NonInterpolated Prec Avg\"\n");
+        // [rocchio | ide | dec hi] * [pseudo | no pseudo] * [expansion | no expansion] * [usePrevResult | no usePrevResult]
+        for (RelevanceFeedbackOption relFeedbackType : RelevanceFeedbackOption.values()) {
+            for (int usePseudo = 0; usePseudo < 2; usePseudo++) {
+                for (int useExpansion = 0; useExpansion < 2; useExpansion++) {
+                    for (int usePrevResult = 0; usePrevResult < 2; usePrevResult++) {
+                        writer.print(relFeedbackType.toString() + "," + usePseudo + "," + useExpansion + "," + usePrevResult);
+                        // TODO
+                        Option option = new Option();
+                        option.setN(N);
+                        option.setS(S);
+                        option.setRelevanceFeedbackOption(relFeedbackType);
+                        if (usePseudo > 0) {
+                            option.setRelevanceFeedbackStatus(RelevanceFeedbackStatus.PSEUDO_RELEVANCE_FEEDBACK);
+                        } else {
+                            option.setRelevanceFeedbackStatus(RelevanceFeedbackStatus.USE_RELEVANCE_FEEDBACK);
+                        }
+                        option.setUseQueryExpansion(useExpansion > 0);
+                        option.setUseSameDocumentCollection(usePrevResult > 0);
+                        setSearchOption(option);
+                        performExperiment(queryPath, relevanceJudgementPath, writer);
+                        writer.println();
                     }
                 }
             }
