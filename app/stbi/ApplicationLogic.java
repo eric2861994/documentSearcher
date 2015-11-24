@@ -17,6 +17,7 @@ import stbi.common.index.ModifiedInvertedIndex;
 import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
+import stbi.common.util.RelevanceFeedbackOption;
 import stbi.indexer.ModifiedInvertedIndexer;
 import stbi.indexer.RawDocument;
 import stbi.relevance.RelevanceJudge;
@@ -237,31 +238,20 @@ public class ApplicationLogic {
     public RelevanceFeedbackDisplayVariables relevanceFeedback(List<Integer> relevantDocumentRealIDs, List<Integer> irrelevantDocumentRealIDs) {
 
         List<Map<Term, Double>> relevantVectors = new ArrayList<>();
-        for (Integer realDocumentID: relevantDocumentRealIDs) {
+        for (Integer realDocumentID : relevantDocumentRealIDs) {
             relevantVectors.add(index.getDocumentTermVector(realDocumentID - 1));
         }
 
         List<Map<Term, Double>> irrelevantVectors = new ArrayList<>();
-        for (Integer realDocumentID: irrelevantDocumentRealIDs) {
-            relevantVectors.add(index.getDocumentTermVector(realDocumentID-1));
+        for (Integer realDocumentID : irrelevantDocumentRealIDs) {
+            relevantVectors.add(index.getDocumentTermVector(realDocumentID - 1));
         }
 
         SearcherV2 searcherV2 = new SearcherV2(index, searcher);
 
         Option searchOption = getSearchOption();
 
-        int reweightMethod = SearcherV2.ROCCHIO;
-        switch (searchOption.getRelevanceFeedbackOption()) {
-            case ROCCHIO:
-                reweightMethod = SearcherV2.ROCCHIO;
-                break;
-            case IDE_REGULER:
-                reweightMethod = SearcherV2.IDE;
-                break;
-            case IDE_DEC_HI:
-                reweightMethod = SearcherV2.DEC_HI;
-                break;
-        }
+        int reweightMethod = getSearcherV2ReweightMethod(searchOption.getRelevanceFeedbackOption());
 
         RelevanceFeedbackDisplayVariables result = new RelevanceFeedbackDisplayVariables();
         result.queryLama = firstSearchQuery;
@@ -288,7 +278,8 @@ public class ApplicationLogic {
         );
 
         Option experimentOption = getExperimentOption();
-        File file = new File(experimentOption.getTfType() + "-" + experimentOption.isUseIDF() + "-" + experimentOption.isUseNormalization() + "-" + experimentOption.isUseStemmer() + ".csv");
+        File file = new File(experimentOption.getTfType() + "-" + experimentOption.isUseIDF() + "-" +
+                experimentOption.isUseNormalization() + "-" + experimentOption.isUseStemmer() + ".csv");
         if (!file.exists()) {
             file.createNewFile();
         }
@@ -299,42 +290,38 @@ public class ApplicationLogic {
         // get experiment queries
         List<RelevanceJudge.Query> testQueries = relevanceJudge.getQueryList();
 
+        // helper class, forced to declare when we need to use because index might change anytime.
         SearcherV2 searcherV2 = new SearcherV2(index, searcher);
+
+        // experiment result is first stored here before stored to field variable
         List<ExperimentResult> experimentResultList = new ArrayList<>();
+
         for (RelevanceJudge.Query query : testQueries) {
             Map<Term, Double> initialQuery = searcher.getQueryVector(index, query.queryString, stopwords,
                     experimentOption.getTfType(), experimentOption.isUseIDF(), experimentOption.isUseNormalization(),
                     experimentOption.isUseStemmer());
             List<Pair<Double, Integer>> firstSearchResult = searcher.search(index, initialQuery);
 
-            List<Integer> filterIDList = new ArrayList<>();
-
-            List<Pair<Double, Integer>> documentSimilarityList;
+            List<Integer> filterIDList = new ArrayList<>(); // required to call kayu's result evaluation
+            List<Pair<Double, Integer>> documentSimilarityList; // the result of second query
             Map<Term, Double> secondQuery = null;
             switch (experimentOption.getRelevanceFeedbackStatus()) {
                 case NO_RELEVANCE_FEEDBACK:
-                    documentSimilarityList = firstSearchResult;
+                    documentSimilarityList = firstSearchResult; // the second query is the same as first query
                     break;
 
                 case PSEUDO_RELEVANCE_FEEDBACK: {
+                    // take the N top documents as relevant document list
                     List<Integer> relevantDocumentList = searcherV2.takeTopDocuments(firstSearchResult, experimentOption.getN());
-                    Set<Integer> relevantDocumentSet = new HashSet<>();
-                    for (Integer documentID : relevantDocumentList) {
-                        relevantDocumentSet.add(documentID);
+
+                    Set<Integer> relevantDocumentSet = new HashSet<>(); // should contain real id
+                    for (Integer myID : relevantDocumentList) {
+                        IndexedDocument indexedDocument = index.getIndexedDocument(myID);
+                        int realID = indexedDocument.getId();
+                        relevantDocumentSet.add(realID);
                     }
 
-                    int reweightMethod = SearcherV2.ROCCHIO;
-                    switch (experimentOption.getRelevanceFeedbackOption()) {
-                        case ROCCHIO:
-                            reweightMethod = SearcherV2.ROCCHIO;
-                            break;
-                        case IDE_REGULER:
-                            reweightMethod = SearcherV2.IDE;
-                            break;
-                        case IDE_DEC_HI:
-                            reweightMethod = SearcherV2.DEC_HI;
-                            break;
-                    }
+                    int reweightMethod = getSearcherV2ReweightMethod(experimentOption.getRelevanceFeedbackOption());
                     secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
                             experimentOption.getN(), reweightMethod, experimentOption.isUseQueryExpansion());
                     documentSimilarityList = searcher.search(index, secondQuery);
@@ -342,11 +329,12 @@ public class ApplicationLogic {
                 }
 
                 case USE_RELEVANCE_FEEDBACK: {
-                    Set<Integer> liarGame = new HashSet<>();
+                    Set<Integer> myIDOfDocumentsSeen = new HashSet<>();
                     for (int i = 0; i < experimentOption.getS() && i < firstSearchResult.size(); i++) {
-                        liarGame.add(firstSearchResult.get(i).second);
+                        myIDOfDocumentsSeen.add(firstSearchResult.get(i).second);
                     }
 
+                    // fill filterIDList with real IDs of document that can be judged
                     for (int i = experimentOption.getS(); i < firstSearchResult.size(); i++) {
                         int myID = firstSearchResult.get(i).second;
                         IndexedDocument indexedDocument = index.getIndexedDocument(myID);
@@ -359,53 +347,54 @@ public class ApplicationLogic {
                     if (relevantDocumentSet == null) {
                         relevantDocumentSet = new HashSet<>();
                     }
-                    int reweightMethod = SearcherV2.ROCCHIO;
-                    switch (experimentOption.getRelevanceFeedbackOption()) {
-                        case ROCCHIO:
-                            reweightMethod = SearcherV2.ROCCHIO;
-                            break;
-                        case IDE_REGULER:
-                            reweightMethod = SearcherV2.IDE;
-                            break;
-                        case IDE_DEC_HI:
-                            reweightMethod = SearcherV2.DEC_HI;
-                            break;
-                    }
+
+                    int reweightMethod = getSearcherV2ReweightMethod(experimentOption.getRelevanceFeedbackOption());
                     secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
                             experimentOption.getS(), reweightMethod, experimentOption.isUseQueryExpansion());
                     documentSimilarityList = searcher.search(index, secondQuery);
 
+                    // if we are not allowed to use the same document collection
                     if (!experimentOption.isUseSameDocumentCollection()) {
-                        List<Pair<Double,Integer>> temporaryDocumentSimilarityList = new ArrayList<>();
+                        List<Pair<Double, Integer>> temporaryDocumentSimilarityList = new ArrayList<>();
 
-                        for (Pair<Double,Integer> wow : documentSimilarityList) {
-                            if (!liarGame.contains(wow.second)) {
-                                temporaryDocumentSimilarityList.add(wow);
+                        // take only unseen result
+                        for (Pair<Double, Integer> searchResult : documentSimilarityList) {
+                            if (!myIDOfDocumentsSeen.contains(searchResult.second)) {
+                                temporaryDocumentSimilarityList.add(searchResult);
                             }
                         }
+
                         documentSimilarityList = temporaryDocumentSimilarityList;
                     }
                     break;
                 }
 
                 default:
+                    // this should never happen
                     documentSimilarityList = new ArrayList<>();
                     break;
             }
 
-            // get all document id of search result, as it is needed in relevanceJudge.evaluate
+            // get all real id of search result, as it is needed in relevanceJudge.evaluate
             List<Integer> relevantDocuments = new ArrayList<>();
+            for (int i = 0; i < documentSimilarityList.size(); i++) {
+                Pair<Double, Integer> mSearchResult = documentSimilarityList.get(i);
+
+                int docID = index.getIndexedDocument(mSearchResult.second).getId();
+
+                relevantDocuments.add(docID);
+            }
+
+            // displayable result of our searching
             List<SearchResultEntry> searchResult = new ArrayList<>();
             for (int i = 0; i < documentSimilarityList.size(); i++) {
-                Pair<Double, Integer> documentSimilarity = documentSimilarityList.get(i);
-                int docID = index.getIndexedDocument(documentSimilarity.second).getId();
-                relevantDocuments.add(docID);
+                Pair<Double, Integer> mSearchResult = documentSimilarityList.get(i);
+
                 searchResult.add(new SearchResultEntry(
                         i + 1,
-                        documentSimilarity.first,
-                        index.getIndexedDocument(documentSimilarity.second)
+                        mSearchResult.first,
+                        index.getIndexedDocument(mSearchResult.second)
                 ));
-
             }
 
             // evaluate a query
@@ -416,10 +405,11 @@ public class ApplicationLogic {
                 eval = relevanceJudge.evaluate(query.id, relevantDocuments, filterIDList);
             }
 
-            ExperimentResult experResult = new ExperimentResult(query.queryString,
-                    (double) eval.precision, (double) eval.recall, (double) eval.nonInterpolatedPrecision, searchResult, initialQuery, secondQuery);
+            ExperimentResult experResult = new ExperimentResult(query.queryString, (double) eval.precision,
+                    (double) eval.recall, (double) eval.nonInterpolatedPrecision, searchResult, initialQuery, secondQuery);
             experimentResultList.add(experResult);
 
+            // writing table to file
             String line = eval.recall + "," + eval.precision + "," + eval.nonInterpolatedPrecision + "\n";
             writer.append(line);
         }
@@ -427,6 +417,23 @@ public class ApplicationLogic {
         writer.close();
 
         experimentResult = experimentResultList;
+    }
+
+    private int getSearcherV2ReweightMethod(RelevanceFeedbackOption option) {
+        int reweightMethod = SearcherV2.ROCCHIO;
+        switch (option) {
+            case ROCCHIO:
+                reweightMethod = SearcherV2.ROCCHIO;
+                break;
+            case IDE_REGULER:
+                reweightMethod = SearcherV2.IDE;
+                break;
+            case IDE_DEC_HI:
+                reweightMethod = SearcherV2.DEC_HI;
+                break;
+        }
+
+        return reweightMethod;
     }
 
     public List<ExperimentResult> getExperimentResults() {
