@@ -250,11 +250,7 @@ public class Application extends Controller {
         //convert to json array
         List<List<String>> retval = new ArrayList<>();
         for (RelevanceFeedbackInteractiveResponse it : relevanceFeedbackInteractiveResponseList) {
-            List<String> tmp = new ArrayList<>();
-            tmp.add(String.valueOf(it.getSimilarity()));
-            tmp.add(String.valueOf(it.getDocumentId()));
-            tmp.add(it.getTitle());
-            retval.add(tmp);
+            retval.add(it.toArrayJsonValue());
         }
 
 //        relevanceFeedbackInteractiveStub.getIrrelevantList() mungkin null

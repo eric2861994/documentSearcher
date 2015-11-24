@@ -3,6 +3,7 @@ package formstubs;
 import stbi.common.IndexedDocument;
 import stbi.common.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,5 +56,13 @@ public class RelevanceFeedbackInteractiveResponse {
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public List<String> toArrayJsonValue() {
+        List<String> tmp = new ArrayList<>();
+        tmp.add(String.valueOf(getSimilarity()));
+        tmp.add(String.valueOf(getDocumentId()));
+        tmp.add(getTitle());
+        return tmp;
     }
 }
