@@ -42,7 +42,6 @@ public class SearcherV2 {
 
         for (Integer topDocumentsIndexId : topDocuments) {
             IndexedDocument document = index.getIndexedDocument(topDocumentsIndexId);
-
             // jika id sebenarnya berada di dalam set
             if (relevantDocumentSet.contains(document.getId()) == value) {
                 // tambahkan term vector dokumen tersebut

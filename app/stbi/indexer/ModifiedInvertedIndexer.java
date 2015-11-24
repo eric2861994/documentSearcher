@@ -37,7 +37,7 @@ public class ModifiedInvertedIndexer {
             RawDocument oneDocument = documents[docIdx];
 
             // only title and body is used in indexing
-            String searchString = oneDocument.getAuthor() + " " + oneDocument.getBody();
+            String searchString = oneDocument.getTitle() + " " + oneDocument.getBody();
 
             StringTermStream stringTermStream = new StringTermStream(searchString, "\\W+");
             StopwordTermStream stopwordTermStream = new StopwordTermStream(stringTermStream, stopwords);

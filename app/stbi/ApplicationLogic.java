@@ -270,6 +270,7 @@ public class ApplicationLogic {
             List<Integer> filterIDList = new ArrayList<>();
 
             List<Pair<Double, Integer>> documentSimilarityList;
+            Map<Term, Double> secondQuery = null;
             switch (experimentOption.getRelevanceFeedbackStatus()) {
                 case NO_RELEVANCE_FEEDBACK:
                     documentSimilarityList = firstSearchResult;
@@ -294,7 +295,7 @@ public class ApplicationLogic {
                             reweightMethod = SearcherV2.DEC_HI;
                             break;
                     }
-                    Map<Term, Double> secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
+                    secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
                             experimentOption.getN(), reweightMethod, experimentOption.isUseQueryExpansion());
                     documentSimilarityList = searcher.search(index, secondQuery);
                     break;
@@ -307,7 +308,9 @@ public class ApplicationLogic {
 
                     Map<Integer, Set<Integer>> relevanceJudgement = relevanceJudge.getQueryRelation();
                     Set<Integer> relevantDocumentSet = relevanceJudgement.get(query.id);
-
+                    if (relevantDocumentSet == null) {
+                        relevantDocumentSet = new HashSet<>();
+                    }
                     int reweightMethod = SearcherV2.ROCCHIO;
                     switch (experimentOption.getRelevanceFeedbackOption()) {
                         case ROCCHIO:
@@ -320,7 +323,7 @@ public class ApplicationLogic {
                             reweightMethod = SearcherV2.DEC_HI;
                             break;
                     }
-                    Map<Term, Double> secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
+                    secondQuery = searcherV2.relevanceFeedback(initialQuery, firstSearchResult, relevantDocumentSet,
                             experimentOption.getS(), reweightMethod, experimentOption.isUseQueryExpansion());
                     documentSimilarityList = searcher.search(index, secondQuery);
                     break;
@@ -355,7 +358,7 @@ public class ApplicationLogic {
             }
 
             ExperimentResult experResult = new ExperimentResult(query.queryString,
-                    (double) eval.precision, (double) eval.recall, (double) eval.nonInterpolatedPrecision, searchResult);
+                    (double) eval.precision, (double) eval.recall, (double) eval.nonInterpolatedPrecision, searchResult, initialQuery, secondQuery);
             experimentResultList.add(experResult);
 
             String line = eval.recall + "," + eval.precision + "," + eval.nonInterpolatedPrecision + "\n";

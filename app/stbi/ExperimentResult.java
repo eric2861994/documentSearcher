@@ -1,7 +1,11 @@
 package stbi;
 
+import stbi.common.term.Term;
+
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ExperimentResult {
     private List<SearchResultEntry> experimentalDetailResultList;
@@ -9,17 +13,25 @@ public class ExperimentResult {
     private double recall;
     private double noninterpolatedAveragePrecision;
     private String query;
+    private Map<Term, Double> initialQuery;
+    private Map<Term, Double> secondQuery;
 
     public ExperimentResult() {
     }
 
     public ExperimentResult(String query, double precision, double recall, double a_noninterpolatedAveragePrecision,
-                            List<SearchResultEntry> experimentalDetailResultList) {
+                            List<SearchResultEntry> experimentalDetailResultList, Map<Term, Double> initialQuery, Map<Term, Double> secondQuery) {
         setQuery(query);
         setPrecision(precision);
         setRecall(recall);
         noninterpolatedAveragePrecision = a_noninterpolatedAveragePrecision;
         setExperimentalDetailResultList(new ArrayList<>(experimentalDetailResultList));
+        setInitialQuery(initialQuery);
+        if (secondQuery == null) {
+            setSecondQuery(new HashMap<Term, Double>());
+        } else {
+            setSecondQuery(secondQuery);
+        }
     }
 
     public final double getPrecision() {
@@ -56,5 +68,21 @@ public class ExperimentResult {
 
     public double getNoninterpolatedAveragePrecision() {
         return noninterpolatedAveragePrecision;
+    }
+
+    public Map<Term, Double> getInitialQuery() {
+        return initialQuery;
+    }
+
+    public void setInitialQuery(Map<Term, Double> initialQuery) {
+        this.initialQuery = initialQuery;
+    }
+
+    public Map<Term, Double> getSecondQuery() {
+        return secondQuery;
+    }
+
+    public void setSecondQuery(Map<Term, Double> secondQuery) {
+        this.secondQuery = secondQuery;
     }
 }
