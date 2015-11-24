@@ -196,7 +196,7 @@ public class RelevanceJudge {
             }
             int nRelevantDocument = queryRelation.get(queryId).size() - numFilter;
             if (nRelevantDocument == 0) return 0;
-            return precisionAccum / queryRelation.get(queryId).size();
+            return precisionAccum / nRelevantDocument;
         }
     }
 
