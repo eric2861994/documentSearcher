@@ -8,9 +8,11 @@ import play.mvc.Controller;
 import play.mvc.Result;
 import stbi.ApplicationLogic;
 import stbi.IndexedFileException;
+import stbi.RelevanceFeedbackDisplayVariables;
 import stbi.common.IndexedDocument;
 import stbi.common.Option;
 import stbi.common.index.Index;
+import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
 import stbi.common.util.RelevanceFeedbackOption;
@@ -19,8 +21,11 @@ import views.html.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectInput;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Application extends Controller {
     private static final String DOCUMENT_INDEXING_TITLE = "Document Indexing";
@@ -242,22 +247,53 @@ public class Application extends Controller {
         Form<RelevanceFeedbackInteractiveStub> relevanceFeedbackInteractiveStubForm = Form.form(RelevanceFeedbackInteractiveStub.class);
         RelevanceFeedbackInteractiveStub relevanceFeedbackInteractiveStub = relevanceFeedbackInteractiveStubForm.bindFromRequest().get();
 
-        appLogic.relevanceFeedback(relevanceFeedbackInteractiveStub.getRelevantList(), relevanceFeedbackInteractiveStub.getIrrelevantList());
-        Pair<Double, IndexedDocument> display = new Pair<>(1.0, new IndexedDocument(231, "judul", "penulis"));
-
-        RelevanceFeedbackInteractiveResponse relevanceFeedbackInteractiveResponse = new RelevanceFeedbackInteractiveResponse(display);
-        List<RelevanceFeedbackInteractiveResponse> relevanceFeedbackInteractiveResponseList = new ArrayList<>();
-        relevanceFeedbackInteractiveResponseList.add(relevanceFeedbackInteractiveResponse);
-
-        //convert to json array
-        List<List<String>> retval = new ArrayList<>();
-        for (RelevanceFeedbackInteractiveResponse it : relevanceFeedbackInteractiveResponseList) {
-            retval.add(it.toArrayJsonValue());
+        List<Integer> arg1 = relevanceFeedbackInteractiveStub.getRelevantList();
+        List<Integer> arg2 = relevanceFeedbackInteractiveStub.getIrrelevantList();
+        if (arg1 == null) {
+            arg1 = new ArrayList<>();
         }
 
-//        relevanceFeedbackInteractiveStub.getIrrelevantList() mungkin null
-//        relevanceFeedbackInteractiveStub.getRelevantList() mungkin null
-//        return ok(interactivesearchnorelevancefeedback.render("RESULT", display))
+        if (arg2 == null){
+            arg2 = new ArrayList<>();
+        }
+        RelevanceFeedbackDisplayVariables relevanceFeedbackDisplayVariables = appLogic.relevanceFeedback(arg1, arg2);
+
+        //convert to json array
+        Map<String, Object> retval = new HashMap<>();
+        List<List<String>> datas = new ArrayList<>();
+        for (Pair<Double, Integer> it : relevanceFeedbackDisplayVariables.hasilPencarianBaru) {
+            IndexedDocument indexedDocument = appLogic.getIndexedDocument(it.second);
+            Pair<Double, IndexedDocument> tmp = new Pair<>(it.first, indexedDocument);
+            RelevanceFeedbackInteractiveResponse relevanceFeedbackInteractiveResponse = new RelevanceFeedbackInteractiveResponse(tmp);
+            datas.add(relevanceFeedbackInteractiveResponse.toArrayJsonValue());
+        }
+        retval.put("data", datas);
+
+        List<List<String>> qbaru = new ArrayList<>();
+        if (relevanceFeedbackDisplayVariables.queryBaru != null) {
+            for (Map.Entry entry : relevanceFeedbackDisplayVariables.queryBaru.entrySet()) {
+                List<String> tmp = new ArrayList<>();
+                Term t = (Term)entry.getKey();
+                Double weight = (Double)entry.getValue();
+                tmp.add(t.getText());
+                tmp.add(String.valueOf(weight));
+                qbaru.add(tmp);
+            }
+        }
+        retval.put("qbaru", qbaru);
+
+        List<List<String>> qlama = new ArrayList<>();
+        if (relevanceFeedbackDisplayVariables.queryLama != null) {
+            for (Map.Entry entry : relevanceFeedbackDisplayVariables.queryLama.entrySet()) {
+                List<String> tmp = new ArrayList<>();
+                Term t = (Term)entry.getKey();
+                Double weight = (Double)entry.getValue();
+                tmp.add(t.getText());
+                tmp.add(String.valueOf(weight));
+                qlama.add(tmp);
+            }
+        }
+        retval.put("qlama", qlama);
 
         return ok(Json.toJson(retval));
     }

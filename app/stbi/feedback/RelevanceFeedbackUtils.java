@@ -16,6 +16,10 @@ public class RelevanceFeedbackUtils {
                                            List<Map<Term,Double>> unrelevantDocuments,
                                            boolean doExpansion) {
 
+        if (oldQueryVector == null) oldQueryVector = new HashMap<Term,Double>();
+        if (relevantDocuments == null) relevantDocuments = new ArrayList<Map<Term,Double>>();
+        if (unrelevantDocuments == null) unrelevantDocuments = new ArrayList<Map<Term,Double>>();
+
         Map<Term,Double> relevantDocumentVector = addTermVector(relevantDocuments);
         Map<Term,Double> unrelevantDocumentVector = addTermVector(unrelevantDocuments);
 
@@ -42,6 +46,10 @@ public class RelevanceFeedbackUtils {
                                                         List<Map<Term,Double>> relevantDocuments,
                                                         List<Map<Term,Double>> unrelevantDocuments,
                                                         boolean doExpansion) {
+
+        if (oldQueryVector == null) oldQueryVector = new HashMap<Term,Double>();
+        if (relevantDocuments == null) relevantDocuments = new ArrayList<Map<Term,Double>>();
+        if (unrelevantDocuments == null) unrelevantDocuments = new ArrayList<Map<Term,Double>>();
         Map<Term,Double> relevantDocumentVector = addTermVector(relevantDocuments);
         Map<Term,Double> unrelevantDocumentVector = addTermVector(unrelevantDocuments);
         return computeTermReweighting(oldQueryVector,
@@ -54,6 +62,11 @@ public class RelevanceFeedbackUtils {
                                                          List<Map<Term,Double>> relevantDocuments,
                                                          Map<Term,Double> unrelevantDocument,
                                                          boolean doExpansion) {
+
+        if (oldQueryVector == null) oldQueryVector = new HashMap<Term,Double>();
+        if (relevantDocuments == null) relevantDocuments = new ArrayList<Map<Term,Double>>();
+        if (unrelevantDocument == null) unrelevantDocument = new HashMap<Term,Double>();
+
         Map<Term,Double> relevantDocumentVector = addTermVector(relevantDocuments);
         return computeTermReweighting(oldQueryVector,
                 relevantDocumentVector,

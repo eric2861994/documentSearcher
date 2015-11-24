@@ -170,7 +170,12 @@ public class ApplicationLogic {
         interactiveRetrievalStub.setUseIdf(option.isUseIDF());
         interactiveRetrievalStub.setUseNormalization(option.isUseNormalization());
         interactiveRetrievalStub.setUseStemmer(option.isUseStemmer());
-
+        interactiveRetrievalStub.setRelevanceFeedbackStatus(option.getRelevanceFeedbackStatus());
+        interactiveRetrievalStub.setRelevanceFeedbackOption(option.getRelevanceFeedbackOption());
+        interactiveRetrievalStub.setUseSameDocumentCollection(option.isUseSameDocumentCollection());
+        interactiveRetrievalStub.setUseQueryExpansion(option.isUseQueryExpansion());
+        interactiveRetrievalStub.setS(option.getS());
+        interactiveRetrievalStub.setN(option.getN());
         return interactiveRetrievalStub;
     }
 
