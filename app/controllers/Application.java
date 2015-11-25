@@ -160,7 +160,10 @@ public class Application extends Controller {
 
             if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK) {
                 return ok(interactivesearchnorelevancefeedback.render("RESULT", displayableSearchResult));
-            } else {
+            } else if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.PSEUDO_RELEVANCE_FEEDBACK){
+                //TODO
+                return ok();
+            } else  {
                 return ok(interactivesearch.render("RESULT", displayableSearchResult));
             }
 
