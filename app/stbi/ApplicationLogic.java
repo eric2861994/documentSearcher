@@ -278,14 +278,14 @@ public class ApplicationLogic {
         List<Pair<Double, Integer>> secondSearchResult = searcher.search(index, result.queryBaru);
         if (searchOption.isUseSameDocumentCollection()) {
             result.hasilPencarianBaru = secondSearchResult;
-        } else  {
+        } else {
             List<Pair<Double, Integer>> finalSearchResult = new ArrayList<>();
-            for (Pair<Double, Integer> searchResult: secondSearchResult) {
+            for (Pair<Double, Integer> searchResult : secondSearchResult) {
                 int myID = searchResult.second;
                 IndexedDocument indexedDocument = index.getIndexedDocument(myID);
                 int realID = indexedDocument.getId();
 
-                if (! annotatedDocumentID.contains(realID)) {
+                if (!annotatedDocumentID.contains(realID)) {
                     finalSearchResult.add(searchResult);
                 }
             }
@@ -295,6 +295,34 @@ public class ApplicationLogic {
 
         return result;
     }
+
+    public RelevanceFeedbackDisplayVariables psuedoRelevanceFeedback(List<Pair<Double, Integer>> firstSearchResult) {
+        Option searchOption = getSearchOption();
+
+        // number of top documents to be treated as relevant
+        int topN = searchOption.getN();
+        List<Map<Term, Double>> relevantVectors = new ArrayList<>();
+        for (int i = 0; i < topN && i < firstSearchResult.size(); i++) {
+            relevantVectors.add(index.getDocumentTermVector(firstSearchResult.get(i).second));
+        }
+
+        // do not treat anything as irrelevant
+        List<Map<Term, Double>> irrelevantVectors = new ArrayList<>();
+
+        // harus dibuat disini karena index dapat berubah
+        SearcherV2 searcherV2 = new SearcherV2(index, searcher);
+
+        int reweightMethod = getSearcherV2ReweightMethod(searchOption.getRelevanceFeedbackOption());
+
+        RelevanceFeedbackDisplayVariables result = new RelevanceFeedbackDisplayVariables();
+
+        result.queryLama = firstSearchQuery;
+        result.queryBaru = searcherV2.relevanceFeedbackV2(firstSearchQuery, relevantVectors, irrelevantVectors, reweightMethod, searchOption.isUseQueryExpansion());
+        result.hasilPencarianBaru = searcher.search(index, result.queryBaru);
+
+        return result;
+    }
+
 
     public void saveIndexingSettings(IndexingDocumentStub indexingDocumentStub) throws IOException {
         new ObjectMapper().writeValue(indexSettingFile, indexingDocumentStub);
@@ -367,7 +395,7 @@ public class ApplicationLogic {
                     }
 
                     // fill filterIDList with real IDs of document that can be judged
-                    for (Integer myID: myIDOfDocumentsSeen) {
+                    for (Integer myID : myIDOfDocumentsSeen) {
                         IndexedDocument indexedDocument = index.getIndexedDocument(myID);
                         int realID = indexedDocument.getId();
 
@@ -456,7 +484,7 @@ public class ApplicationLogic {
 
         experimentResult = experimentResultList;
     }
-    
+
     public void performExperiment(String queryPath, String relevanceJudgementPath, PrintWriter writer) throws IOException {
         RelevanceJudge relevanceJudge = new RelevanceJudge(
                 Play.application().getFile(queryPath),
@@ -727,9 +755,9 @@ public class ApplicationLogic {
     public void writeRelevanceFeedbackSummary() throws IOException {
         // START OF SETTING
         // Ubah settingan untuk 2 jenis Data dan Stemming atau tidak
-        String queryPath = "dataset/ADI/query.text";
-        String relevanceJudgementPath = "dataset/ADI/qrels.text";
-        String documentLocation = "dataset/ADI/adi.all";
+        String queryPath = "dataset/NPL/QUERYACB";
+        String relevanceJudgementPath = "dataset/NPL/QRELSACA";
+        String documentLocation = "dataset/NPL/NPL.ALL";
         Calculator.TFType tfType = Calculator.TFType.RAW_TF;
         boolean useIdf = false;
         boolean useStemming = false;
@@ -777,7 +805,7 @@ public class ApplicationLogic {
                         }
                         option.setUseQueryExpansion(useExpansion > 0);
                         option.setUseSameDocumentCollection(usePrevResult > 0);
-                        setSearchOption(option);
+                        setExperimentOption(option);
                         performExperiment(queryPath, relevanceJudgementPath, writer);
                         writer.println();
                     }

@@ -161,7 +161,7 @@ public class Application extends Controller {
             if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK) {
                 return ok(interactivesearchnorelevancefeedback.render("RESULT", displayableSearchResult));
             } else if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.PSEUDO_RELEVANCE_FEEDBACK){
-                //TODO
+                appLogic.psuedoRelevanceFeedback(firstSearchResult);
                 return ok();
             } else  {
                 return ok(interactivesearch.render("RESULT", displayableSearchResult));
@@ -243,7 +243,7 @@ public class Application extends Controller {
     public static Result postSummary() throws IOException {
         Form<ExperimentalRetrievalStub> experimentalRetrievalStubForm = Form.form(ExperimentalRetrievalStub.class);
         ExperimentalRetrievalStub experimentalRetrievalStub = experimentalRetrievalStubForm.bindFromRequest().get();
-        appLogic.writeSummary();
+        appLogic.writeRelevanceFeedbackSummary();
         return ok();
     }
 
