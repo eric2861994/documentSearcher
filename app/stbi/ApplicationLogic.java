@@ -276,18 +276,22 @@ public class ApplicationLogic {
 
 
         List<Pair<Double, Integer>> secondSearchResult = searcher.search(index, result.queryBaru);
-        List<Pair<Double, Integer>> finalSearchResult = new ArrayList<>();
-        for (Pair<Double, Integer> searchResult: secondSearchResult) {
-            int myID = searchResult.second;
-            IndexedDocument indexedDocument = index.getIndexedDocument(myID);
-            int realID = indexedDocument.getId();
+        if (searchOption.isUseSameDocumentCollection()) {
+            result.hasilPencarianBaru = secondSearchResult;
+        } else  {
+            List<Pair<Double, Integer>> finalSearchResult = new ArrayList<>();
+            for (Pair<Double, Integer> searchResult: secondSearchResult) {
+                int myID = searchResult.second;
+                IndexedDocument indexedDocument = index.getIndexedDocument(myID);
+                int realID = indexedDocument.getId();
 
-            if (! annotatedDocumentID.contains(realID)) {
-                finalSearchResult.add(searchResult);
+                if (! annotatedDocumentID.contains(realID)) {
+                    finalSearchResult.add(searchResult);
+                }
             }
-        }
 
-        result.hasilPencarianBaru = finalSearchResult;
+            result.hasilPencarianBaru = finalSearchResult;
+        }
 
         return result;
     }
@@ -452,7 +456,7 @@ public class ApplicationLogic {
 
         experimentResult = experimentResultList;
     }
-
+    
     public void performExperiment(String queryPath, String relevanceJudgementPath, PrintWriter writer) throws IOException {
         RelevanceJudge relevanceJudge = new RelevanceJudge(
                 Play.application().getFile(queryPath),
