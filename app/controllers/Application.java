@@ -11,7 +11,6 @@ import stbi.IndexedFileException;
 import stbi.RelevanceFeedbackDisplayVariables;
 import stbi.common.IndexedDocument;
 import stbi.common.Option;
-import stbi.common.index.Index;
 import stbi.common.term.Term;
 import stbi.common.util.Calculator;
 import stbi.common.util.Pair;
@@ -21,7 +20,6 @@ import views.html.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.ObjectInput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -161,8 +159,18 @@ public class Application extends Controller {
             if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.NO_RELEVANCE_FEEDBACK) {
                 return ok(interactivesearchnorelevancefeedback.render("RESULT", displayableSearchResult));
             } else if (appLogic.getSearchOption().getRelevanceFeedbackStatus() == RelevanceFeedbackStatus.PSEUDO_RELEVANCE_FEEDBACK){
-                appLogic.psuedoRelevanceFeedback(firstSearchResult);
-                return ok();
+                RelevanceFeedbackDisplayVariables relevanceFeedbackDisplayVariables = appLogic.psuedoRelevanceFeedback(firstSearchResult);
+                List<Pair<Double, IndexedDocument>> ret = new ArrayList<>();
+                for (Pair<Double, Integer> it : relevanceFeedbackDisplayVariables.hasilPencarianBaru) {
+                    IndexedDocument indexedDocument = appLogic.getIndexedDocument(it.second);
+                    Pair<Double, IndexedDocument> tmp = new Pair<>(it.first, indexedDocument);
+                    ret.add(tmp);
+                }
+                PseudoRelevanceFeedbackInteractiveResponse pseudoRelevanceFeedbackInteractiveResponse = new PseudoRelevanceFeedbackInteractiveResponse();
+                pseudoRelevanceFeedbackInteractiveResponse.setHasilPencarian(ret);
+                pseudoRelevanceFeedbackInteractiveResponse.setQueryBaru(relevanceFeedbackDisplayVariables.queryBaru);
+                pseudoRelevanceFeedbackInteractiveResponse.setQueryLama(relevanceFeedbackDisplayVariables.queryLama);
+                return ok(interactivesearchpseudorelevancefeedback.render("RESULT", pseudoRelevanceFeedbackInteractiveResponse));
             } else  {
                 return ok(interactivesearch.render("RESULT", displayableSearchResult));
             }

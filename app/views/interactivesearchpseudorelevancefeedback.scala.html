@@ -1,0 +1,104 @@
+@import formstubs.PseudoRelevanceFeedbackInteractiveResponse
+@(title:String = "Result")(list:PseudoRelevanceFeedbackInteractiveResponse)
+@main(title = title) {
+    <table id="example" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Similarity</th>
+                <th>DocumentID</th>
+                <th>Title</th>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr>
+                <th>Similarity</th>
+                <th>DocumentID</th>
+                <th>Title</th>
+            </tr>
+        </tfoot>
+
+        <tbody>
+        @for(p <- list.getHasilPencarian()) {
+            <tr>
+                <td>@p.first</td>
+                <td>@p.second.getId</td>
+                <td>@p.second.getTitle</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <p>Query baru</p>
+    <table id="qbaru" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>Weight</th>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr>
+                <th>Similarity</th>
+                <th>DocumentID</th>
+            </tr>
+        </tfoot>
+
+        <tbody>
+        @for((key,value) <- list.getQueryBaru()) {
+            <tr>
+                <td>@key</td>
+                <td>@value</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+    <p>Query lama</p>
+    <table id="qlama" class="display" cellspacing="0" width="100%">
+        <thead>
+            <tr>
+                <th>Term</th>
+                <th>Weight</th>
+            </tr>
+        </thead>
+
+        <tfoot>
+            <tr>
+                <th>Similarity</th>
+                <th>DocumentID</th>
+            </tr>
+        </tfoot>
+
+        <tbody>
+            @for((key,value) <- list.getQueryLama) {
+                <tr>
+                    <td>@key</td>
+                    <td>@value</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+} {
+    <script type="text/javascript">
+            $(document).ready(function() {
+                $('#example').DataTable({
+                    "paging":   true,
+                    "ordering": true,
+                    "info":     true,
+                    "order": [[ 0, "desc" ]]
+                });
+                $('#qbaru').DataTable({
+                    "paging":   true,
+                    "ordering": true,
+                    "info":     true,
+                    "order": [[ 0, "desc" ]]
+                });
+                $('#qlama').DataTable({
+                    "paging":   true,
+                    "ordering": true,
+                    "info":     true,
+                    "order": [[ 0, "desc" ]]
+                });
+            } );
+    </script>
+}
